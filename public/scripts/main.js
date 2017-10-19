@@ -1,18 +1,3 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 // Initializes MealPrepSunday.
@@ -28,7 +13,7 @@ function MealPrepSunday() {
   this.ingredientInput = document.getElementById('ingredient');
   this.addIngredient = document.getElementById('add-ingredient');
 
-  this.recipeList = document.getElementById('recipes');
+  this.recipeList = document.getElementById('recipe-list');
   this.recipeForm = document.getElementById('recipe-form');
 
   var buttonTogglingHandler = this.toggleButton.bind(this);
@@ -71,6 +56,7 @@ MealPrepSunday.prototype.signIn = function() {
 MealPrepSunday.prototype.signOut = function() {
   // Sign out of Firebase.
   this.auth.signOut();
+  window.location.reload();
 };
 
 // Triggers when the auth state change for instance when the user signs-in or signs-out.
@@ -78,7 +64,6 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
   if (user) { // User is signed in!
     var userName = user.displayName;
     var profilePicUrl = user.photoURL;
-    var userID = user.uid;
 
     this.userPic.style.backgroundImage = 'url(' + (profilePicUrl || '/images/profile_placeholder.png') + ')';
     this.userName.textContent = userName;
@@ -105,7 +90,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 };
 
 // Returns true if user is signed-in. Otherwise false and displays a message.
-MealPrepSunday.prototype.checkSignedInWithMessage = function() {
+MealPrepSunday.prototype.checkSignedIn = function() {
   // Return true if the user is signed in Firebase
   if (this.auth.currentUser) {
     return true;
@@ -161,11 +146,8 @@ MealPrepSunday.prototype.displayInventory = function(key, text) {
   var container = document.createElement('tr');
   container.innerHTML = MealPrepSunday.INGREDIENT_TEMPLATE;
   var td = container.firstChild;
-  console.log(td);
   td.setAttribute('id', key);
-  console.log(td);
   td.textContent = text;
-  console.log(td);
   this.inventoryList.appendChild(container);
 };
 
