@@ -17,10 +17,9 @@
 
 // Initializes MealPrepSunday.
 function MealPrepSunday() {
-  this.checkSetup();
-
   // Shortcuts to DOM Elements.
   this.userName = document.getElementById('user-name');
+  this.userPic = document.getElementById('user-pic');
   this.signInButton = document.getElementById('sign-in');
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
@@ -38,6 +37,16 @@ function MealPrepSunday() {
 // Sets up shortcuts to Firebase features and initiate firebase auth.
 MealPrepSunday.prototype.initFirebase = function() {
   // Shortcuts to Firebase SDK features.
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBjvLrWLCqOv6nlU6I_Ug8TxyuiaatIXjk",
+    authDomain: "ee461l-mealprepsunday.firebaseapp.com",
+    databaseURL: "https://ee461l-mealprepsunday.firebaseio.com",
+    projectId: "ee461l-mealprepsunday",
+    storageBucket: "ee461l-mealprepsunday.appspot.com",
+    messagingSenderId: "28260377775"
+  };
+  firebase.initializeApp(config);
   this.auth = firebase.auth();
   this.database = firebase.database();
   this.storage = firebase.storage();
@@ -60,24 +69,23 @@ MealPrepSunday.prototype.signOut = function() {
 MealPrepSunday.prototype.onAuthStateChanged = function(user) {
   if (user) { // User is signed in!
     var userName = user.displayName;
+    var profilePicUrl = user.photoURL;
 
+    this.userPic.style.backgroundImage = 'url(' + (profilePicUrl || '/images/profile_placeholder.png') + ')';
     this.userName.textContent = userName;
 
     // Show user's profile and sign-out button.
     this.userName.removeAttribute('hidden');
+    this.userPic.removeAttribute('hidden');
     this.signOutButton.removeAttribute('hidden');
 
     // Hide sign-in button.
     this.signInButton.setAttribute('hidden', 'true');
 
-    // We load currently existing chant messages.
-    this.loadMessages();
-
-    // We save the Firebase Messaging Device token and enable notifications.
-    this.saveMessagingDeviceToken();
   } else { // User is signed out!
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
+    this.userPic.setAttribute('hidden', 'true');
     this.signOutButton.setAttribute('hidden', 'true');
 
     // Show sign-in button.
@@ -99,23 +107,6 @@ MealPrepSunday.prototype.checkSignedInWithMessage = function() {
   };
   this.signInSnackbar.MaterialSnackbar.showSnackbar(data);
   return false;
-};
-
-// Saves the messaging device token to the datastore.
-MealPrepSunday.prototype.saveMessagingDeviceToken = function() {
-  firebase.messaging().getToken().then(function(currentToken) {
-    if (currentToken) {
-      console.log('Got FCM device token:', currentToken);
-      // Saving the Device Token to the datastore.
-      firebase.database().ref('/fcmTokens').child(currentToken)
-          .set(firebase.auth().currentUser.uid);
-    } else {
-      // Need to request permissions to show notifications.
-      this.requestNotificationsPermissions();
-    }
-  }.bind(this)).catch(function(error){
-    console.error('Unable to get messaging token.', error);
-  });
 };
 
 // Resets the given MaterialTextField.

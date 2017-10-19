@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "ee461l-mealprepsunday"
+    "default": "ee461l-mealprepsunday",
+    "staging": "ee461l-mealprepsunday"
   }
 }
