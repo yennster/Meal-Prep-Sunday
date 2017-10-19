@@ -18,10 +18,6 @@
 
     <link rel="shortcut icon" href="images/favicon.png">
 
-    <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
-    <!--
-    <link rel="canonical" href="http://www.example.com/">
-    -->
     <script src="https://www.gstatic.com/firebasejs/4.5.2/firebase.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -64,10 +60,10 @@
           </div>
         </header>
         <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-          <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
-          <a class="mdl-navigation__link" href="/recipes"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">inbox</i>Recipes</a>
-          <a class="mdl-navigation__link" href="/grocery-list"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>Grocery List</a>
-          <a class="mdl-navigation__link" href="/grocery-list"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">format_list_numbered</i>Inventory</a>
+          <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
+          <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">inbox</i>Recipes</a>
+          <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>Grocery List</a>
+          <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">format_list_numbered</i>Inventory</a>
           <div class="mdl-layout-spacer"></div>
           <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
         </nav>
@@ -75,11 +71,33 @@
       <main class="mdl-layout__content mdl-color--grey-100">
         <div class="mdl-grid demo-content">
           <div id="main_content" class="mdl-grid mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col">
-            <h4 class="mdl-cell mdl-cell--12-col">Test Header</h4>
+            <h4 class="mdl-cell mdl-cell--12-col">Ingredients List Test</h4>
             <div class="mdl-cell mdl-cell--12-col">
-              Dolore ex deserunt aute fugiat aute nulla ea sunt aliqua nisi cupidatat eu. Nostrud in laboris labore nisi amet do dolor eu fugiat consectetur elit cillum esse. Pariatur occaecat nisi laboris tempor laboris eiusmod qui id Lorem esse commodo in. Exercitation aute dolore deserunt culpa consequat elit labore incididunt elit anim.
+              <form id="inventory-form" action="#">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                  <input class="mdl-textfield__input" type="text" id="ingredient">
+                  <label class="mdl-textfield__label" for="ingredient">Add ingredient...</label>
+                </div>
+                <button id="add-ingredient" disabled type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                  Add
+                </button>
+              </form>
             </div>
+
           </div>
+          <table class="mdl-cell mdl-cell--12-col mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+            <thead>
+              <tr>
+                <th class="mdl-data-table__cell--non-numeric">Ingredients</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-list">
+            </tbody>
+          </table>
+        </div>
+        <div id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
+          <div class="mdl-snackbar__text"></div>
+          <button class="mdl-snackbar__action" type="button"></button>
         </div>
       </main>
     </div>

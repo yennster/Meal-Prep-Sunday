@@ -23,11 +23,19 @@ function MealPrepSunday() {
   this.signInButton = document.getElementById('sign-in');
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
+  this.inventoryForm = document.getElementById('inventory-form');
+  this.inventoryList = document.getElementById('inventory-list');
+  this.ingredientInput = document.getElementById('ingredient');
+  this.addIngredient = document.getElementById('add-ingredient');
 
   this.recipeList = document.getElementById('recipes');
   this.recipeForm = document.getElementById('recipe-form');
 
-  // Saves message on form submit.
+  var buttonTogglingHandler = this.toggleButton.bind(this);
+  this.ingredientInput.addEventListener('keyup', buttonTogglingHandler);
+  this.ingredientInput.addEventListener('change', buttonTogglingHandler);
+
+  this.inventoryForm.addEventListener('submit', this.saveIngredient.bind(this));
   this.signOutButton.addEventListener('click', this.signOut.bind(this));
   this.signInButton.addEventListener('click', this.signIn.bind(this));
 
@@ -70,6 +78,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
   if (user) { // User is signed in!
     var userName = user.displayName;
     var profilePicUrl = user.photoURL;
+    var userID = user.uid;
 
     this.userPic.style.backgroundImage = 'url(' + (profilePicUrl || '/images/profile_placeholder.png') + ')';
     this.userName.textContent = userName;
@@ -78,6 +87,8 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     this.userName.removeAttribute('hidden');
     this.userPic.removeAttribute('hidden');
     this.signOutButton.removeAttribute('hidden');
+
+    this.loadInventory();
 
     // Hide sign-in button.
     this.signInButton.setAttribute('hidden', 'true');
@@ -109,17 +120,73 @@ MealPrepSunday.prototype.checkSignedInWithMessage = function() {
   return false;
 };
 
+// Saves a new message on the Firebase DB.
+MealPrepSunday.prototype.saveIngredient = function(e) {
+  e.preventDefault();
+
+  // Check that the user entered a message and is signed in.
+  if (this.ingredientInput.value) {
+    var currentUser = this.auth.currentUser.uid;
+    this.inventoryRef = this.database.ref(currentUser + "/inventory");
+    console.log(currentUser + "/inventory" + "/" + this.ingredientInput.value);
+    this.inventoryRef.push({
+      text: this.ingredientInput.value,
+    }).then(function() {
+      // Clear message text field and SEND button state.
+      MealPrepSunday.resetMaterialTextfield(this.ingredientInput);
+      this.toggleButton();
+    }.bind(this)).catch(function(error) {
+      console.error('Error writing new message to Firebase Database', error);
+    });
+  }
+};
+
+// Loads chat messages history and listens for upcoming ones.
+MealPrepSunday.prototype.loadInventory = function() {
+  var currentUser = this.auth.currentUser.uid;
+  this.inventoryRef = this.database.ref(currentUser + "/inventory");
+  this.inventoryRef.off();
+
+  // Loads the last 12 messages and listen for new ones.
+  var setIngredient = function(data) {
+    var val = data.val();
+    this.displayInventory(data.key, val.text);
+  }.bind(this);
+  this.inventoryRef.on('child_added', setIngredient);
+  this.inventoryRef.on('child_changed', setIngredient);
+};
+
+// Displays a Message in the UI.
+MealPrepSunday.prototype.displayInventory = function(key, text) {
+  var container = document.createElement('tr');
+  container.innerHTML = MealPrepSunday.INGREDIENT_TEMPLATE;
+  var td = container.firstChild;
+  console.log(td);
+  td.setAttribute('id', key);
+  console.log(td);
+  td.textContent = text;
+  console.log(td);
+  this.inventoryList.appendChild(container);
+};
+
+MealPrepSunday.prototype.toggleButton = function() {
+  if (this.ingredientInput.value) {
+    this.addIngredient.removeAttribute('disabled');
+  } else {
+    this.addIngredient.setAttribute('disabled', 'true');
+  }
+};
+
 // Resets the given MaterialTextField.
 MealPrepSunday.resetMaterialTextfield = function(element) {
   element.value = '';
   element.parentNode.MaterialTextfield.boundUpdateClassesHandler();
 };
 
-MealPrepSunday.RECIPE_TEMPLATE =
-    '<div class="recipe-container">' +
-      '<div class="recipe"></div>' +
-      '<div class="name"></div>' +
-    '</div>';
+MealPrepSunday.INGREDIENT_TEMPLATE =
+    '<tr>' +
+      '<td class="ingred mdl-data-table__cell--non-numeric"></td>' +
+    '</tr>';
 
 window.onload = function() {
   window.mealPrepSunday = new MealPrepSunday();
