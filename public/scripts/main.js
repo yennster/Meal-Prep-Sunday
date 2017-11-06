@@ -2,6 +2,10 @@
 
 // Initializes MealPrepSunday.
 function MealPrepSunday() {
+  document.getElementById("Inventory").style.visibility = "hidden";
+  $("#inventory-selector").click(function(event){
+    document.getElementById("Inventory").style.visibility = "visible";
+  });
   // Shortcuts to DOM Elements.
   this.userName = document.getElementById('user-name');
   this.userPic = document.getElementById('user-pic');
@@ -11,6 +15,7 @@ function MealPrepSunday() {
   this.inventoryForm = document.getElementById('inventory-form');
   this.inventoryList = document.getElementById('inventory-list');
   this.ingredientInput = document.getElementById('ingredient');
+  this.ingredientAmount = document.getElementById('ingredient_amount');
   this.addIngredient = document.getElementById('add-ingredient');
 
   this.recipeList = document.getElementById('recipe-list');
@@ -19,6 +24,8 @@ function MealPrepSunday() {
   var buttonTogglingHandler = this.toggleButton.bind(this);
   this.ingredientInput.addEventListener('keyup', buttonTogglingHandler);
   this.ingredientInput.addEventListener('change', buttonTogglingHandler);
+  this.ingredientAmount.addEventListener('keyup', buttonTogglingHandler);
+  this.ingredientAmount.addEventListener('change', buttonTogglingHandler);
 
   this.inventoryForm.addEventListener('submit', this.saveIngredient.bind(this));
   this.signOutButton.addEventListener('click', this.signOut.bind(this));
@@ -115,10 +122,12 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
     this.inventoryRef = this.database.ref(currentUser + "/inventory");
     console.log(currentUser + "/inventory" + "/" + this.ingredientInput.value);
     this.inventoryRef.push({
-      text: this.ingredientInput.value,
+      ingredient: this.ingredientInput.value,
+      amount: this.ingredientAmount.value,
     }).then(function() {
       // Clear message text field and SEND button state.
       MealPrepSunday.resetMaterialTextfield(this.ingredientInput);
+      MealPrepSunday.resetMaterialTextfield(this.ingredientAmount);
       this.toggleButton();
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
@@ -126,28 +135,28 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
   }
 };
 
-// Loads chat messages history and listens for upcoming ones.
 MealPrepSunday.prototype.loadInventory = function() {
   var currentUser = this.auth.currentUser.uid;
   this.inventoryRef = this.database.ref(currentUser + "/inventory");
   this.inventoryRef.off();
 
-  // Loads the last 12 messages and listen for new ones.
   var setIngredient = function(data) {
     var val = data.val();
-    this.displayInventory(data.key, val.text);
+    this.displayInventory(data.key, val.ingredient, val.amount);
   }.bind(this);
   this.inventoryRef.on('child_added', setIngredient);
   this.inventoryRef.on('child_changed', setIngredient);
 };
 
-// Displays a Message in the UI.
-MealPrepSunday.prototype.displayInventory = function(key, text) {
+MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount) {
   var container = document.createElement('tr');
   container.innerHTML = MealPrepSunday.INGREDIENT_TEMPLATE;
   var td = container.firstChild;
   td.setAttribute('id', key);
-  td.textContent = text;
+  td.textContent = ingredient;
+  var td2 = container.firstChild.nextSibling;
+  td2.setAttribute('id', key);
+  td2.textContent = amount;
   this.inventoryList.appendChild(container);
 };
 
@@ -167,8 +176,19 @@ MealPrepSunday.resetMaterialTextfield = function(element) {
 
 MealPrepSunday.INGREDIENT_TEMPLATE =
     '<tr>' +
-      '<td class="ingred mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell">' +
+        '<button class="mdl-button mdl-js-button mdl-button--raised">Edit</button>' +
+      '</td>' +
     '</tr>';
+
+/**
+'<td class="ingred mdl-data-table__cell--non-nurmeric">' +
+  '<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">' +
+  '<i class="material-icons">remove</i></button>' +
+'</td>' +
+**/
 
 window.onload = function() {
   window.mealPrepSunday = new MealPrepSunday();

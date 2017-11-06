@@ -79,6 +79,9 @@ html, body {
       -ms-flex-positive: 1;
           flex-grow: 1;
 }
+a.mdl-navigation__link:hover {
+  cursor: pointer;
+}
 .demo-layout .demo-navigation .mdl-navigation__link {
   display: -webkit-flex !important;
   display: -ms-flexbox !important;
