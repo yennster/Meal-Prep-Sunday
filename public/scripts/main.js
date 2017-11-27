@@ -139,24 +139,45 @@ MealPrepSunday.prototype.loadInventory = function() {
   var currentUser = this.auth.currentUser.uid;
   this.inventoryRef = this.database.ref(currentUser + "/inventory");
   this.inventoryRef.off();
+  var numIngredients = 0;
 
   var setIngredient = function(data) {
     var val = data.val();
-    this.displayInventory(data.key, val.ingredient, val.amount);
+    this.displayInventory(data.key, val.ingredient, val.amount, numIngredients);
+    numIngredients++;
   }.bind(this);
   this.inventoryRef.on('child_added', setIngredient);
   this.inventoryRef.on('child_changed', setIngredient);
 };
 
-MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount) {
+function editIngredient(num) {
+
+};
+
+function removeIngredient(num) {
+  var key = document.getElementById("name" + num + "").parentNode.id;
+  document.getElementById("name" + num + "").parentNode.outerHTML="";
+
+};
+
+MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, num) {
   var container = document.createElement('tr');
   container.innerHTML = MealPrepSunday.INGREDIENT_TEMPLATE;
+  container.setAttribute('id', key);
   var td = container.firstChild;
-  td.setAttribute('id', key);
+  //td.setAttribute('id', key);
+  td.setAttribute('id', "name" + num);
   td.textContent = ingredient;
   var td2 = container.firstChild.nextSibling;
-  td2.setAttribute('id', key);
+  //td2.setAttribute('id', key);
+  td2.setAttribute('id', "amount" + num);
   td2.textContent = amount;
+  var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
+  td3.setAttribute('id', "edit" + num);
+  td3.setAttribute('onclick', "editIngredient('" + num + "')");
+  var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
+  td4.setAttribute('id', "remove" + num);
+  td4.setAttribute('onclick', "removeIngredient('" + num + "')");
   this.inventoryList.appendChild(container);
 };
 
@@ -177,9 +198,12 @@ MealPrepSunday.resetMaterialTextfield = function(element) {
 MealPrepSunday.INGREDIENT_TEMPLATE =
     '<tr>' +
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
-      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
-        '<button class="mdl-button mdl-js-button mdl-button--raised">Edit</button>' +
+        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--raised">Edit</button>' +
+      '</td>' +
+      '<td class="mdl-data-table__cell">' +
+        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--raised">Remove</button>' +
       '</td>' +
     '</tr>';
 
