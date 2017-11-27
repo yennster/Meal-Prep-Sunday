@@ -82,6 +82,8 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
     this.loadInventory();
 
+    $(document).on('click', '.inventory-remove', this.removeIngredient.bind(this));
+
     // Hide sign-in button.
     this.signInButton.setAttribute('hidden', 'true');
 
@@ -140,7 +142,6 @@ MealPrepSunday.prototype.loadInventory = function() {
   this.inventoryRef = this.database.ref(currentUser + "/inventory");
   this.inventoryRef.off();
   var numIngredients = 0;
-
   var setIngredient = function(data) {
     var val = data.val();
     this.displayInventory(data.key, val.ingredient, val.amount, numIngredients);
@@ -150,14 +151,21 @@ MealPrepSunday.prototype.loadInventory = function() {
   this.inventoryRef.on('child_changed', setIngredient);
 };
 
-function editIngredient(num) {
+MealPrepSunday.prototype.editIngredient = function(e) {
 
 };
 
-function removeIngredient(num) {
-  var key = document.getElementById("name" + num + "").parentNode.id;
+MealPrepSunday.prototype.removeIngredient = function(e) {
+  var target = e.target;
+  console.log(target);
+  var num = target.id;
+  console.log(num);
+  var key = target.parentNode.id;
+  console.log(key);
   document.getElementById("name" + num + "").parentNode.outerHTML="";
-
+  //var currentUser = this.auth.currentUser.uid;
+  //this.inventoryRef = this.database.ref(currentUser + "/inventory");
+  //this.inventoryRef.child(key).remove();
 };
 
 MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, num) {
@@ -173,11 +181,13 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   td2.setAttribute('id', "amount" + num);
   td2.textContent = amount;
   var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
-  td3.setAttribute('id', "edit" + num);
-  td3.setAttribute('onclick', "editIngredient('" + num + "')");
+  td3.setAttribute('id', num);
+  //td3.setAttribute('onclick', "editIngredient('" + num + "')");
+  //td3.addEventListener('click', this.removeIngredient(num));
   var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
-  td4.setAttribute('id', "remove" + num);
-  td4.setAttribute('onclick', "removeIngredient('" + num + "')");
+  td4.setAttribute('id', num);
+  //td4.setAttribute('onclick', "removeIngredient('" + num + "')");
+  //td4.addEventListener('click', this.removeIngredient(num));
   this.inventoryList.appendChild(container);
 };
 
