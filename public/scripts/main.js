@@ -82,6 +82,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
     this.loadInventory();
 
+    $(document).on('click', '.inventory-edit', this.editIngredient.bind(this));
     $(document).on('click', '.inventory-remove', this.removeIngredient.bind(this));
 
     // Hide sign-in button.
@@ -122,7 +123,6 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
   if (this.ingredientInput.value) {
     var currentUser = this.auth.currentUser.uid;
     this.inventoryRef = this.database.ref(currentUser + "/inventory");
-    console.log(currentUser + "/inventory" + "/" + this.ingredientInput.value);
     this.inventoryRef.push({
       ingredient: this.ingredientInput.value,
       amount: this.ingredientAmount.value,
@@ -148,24 +148,52 @@ MealPrepSunday.prototype.loadInventory = function() {
     numIngredients++;
   }.bind(this);
   this.inventoryRef.on('child_added', setIngredient);
-  this.inventoryRef.on('child_changed', setIngredient);
+  //this.inventoryRef.on('child_changed', setIngredient);
 };
 
 MealPrepSunday.prototype.editIngredient = function(e) {
-
+  e.preventDefault();
+  var target = e.target;
+  target.style.display = "none";
+  target.nextSibling.style.display = "inline";
+  var num = target.id;
+  var key = target.parentNode.parentNode.id;
+  var ingredient = document.getElementById("name" + num);
+  var amount = document.getElementById("amount" + num);
+  var name = ingredient.textContent;
+  var current_amt = amount.textContent;
+  ingredient.innerHTML = "<input class='mdl-textfield__input' type='text' value='" + name + "' id='new_name" + num + "'>"
+  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='" + current_amt + "' id='new_amount" + num + "'>"
+  var currentUser = this.auth.currentUser.uid;
+  var inventoryRef = this.database.ref(currentUser + "/inventory");
+  target.nextSibling.addEventListener("click", function(e) {
+    e.preventDefault();
+    var new_ingred = document.getElementById("new_name" + num).value;
+    var new_amt = document.getElementById("new_amount" + num).value;
+    console.log(new_ingred);
+    console.log(new_amt);
+    inventoryRef.child(key).set({
+      ingredient: new_ingred,
+      amount: new_amt,
+    }).then(function() {
+      document.getElementById("name" + num).innerHTML = new_ingred;
+      document.getElementById("amount" + num).innerHTML = new_amt;
+      target.style.display = "inline";
+      target.nextSibling.style.display = "none";
+    }.bind(this)).catch(function(error) {
+      console.error('Error writing new message to Firebase Database', error);
+    });
+  });
 };
 
 MealPrepSunday.prototype.removeIngredient = function(e) {
   var target = e.target;
-  console.log(target);
   var num = target.id;
-  console.log(num);
-  var key = target.parentNode.id;
-  console.log(key);
+  var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
-  //var currentUser = this.auth.currentUser.uid;
-  //this.inventoryRef = this.database.ref(currentUser + "/inventory");
-  //this.inventoryRef.child(key).remove();
+  var currentUser = this.auth.currentUser.uid;
+  this.inventoryRef = this.database.ref(currentUser + "/inventory");
+  this.inventoryRef.child(key).remove();
 };
 
 MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, num) {
@@ -182,12 +210,8 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   td2.textContent = amount;
   var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
   td3.setAttribute('id', num);
-  //td3.setAttribute('onclick', "editIngredient('" + num + "')");
-  //td3.addEventListener('click', this.removeIngredient(num));
   var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   td4.setAttribute('id', num);
-  //td4.setAttribute('onclick', "removeIngredient('" + num + "')");
-  //td4.addEventListener('click', this.removeIngredient(num));
   this.inventoryList.appendChild(container);
 };
 
@@ -211,6 +235,7 @@ MealPrepSunday.INGREDIENT_TEMPLATE =
       '<td class="mdl-data-table__cell--numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
         '<button class="inventory-edit mdl-button mdl-js-button mdl-button--raised">Edit</button>' +
+        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--raised" type="submit" style="display:none;">Submit</button>' +
       '</td>' +
       '<td class="mdl-data-table__cell">' +
         '<button class="inventory-remove mdl-button mdl-js-button mdl-button--raised">Remove</button>' +
