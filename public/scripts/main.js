@@ -57,7 +57,7 @@ MealPrepSunday.prototype.initFirebase = function() {
 MealPrepSunday.prototype.signIn = function() {
   // Sign in Firebase using popup auth and Google as the identity provider.
   var provider = new firebase.auth.GoogleAuthProvider();
-  this.auth.signInWithPopup(provider);
+  this.auth.signInWithRedirect(provider);
 };
 
 MealPrepSunday.prototype.signOut = function() {
@@ -87,7 +87,6 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
     // Hide sign-in button.
     this.signInButton.setAttribute('hidden', 'true');
-
   } else { // User is signed out!
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
@@ -153,7 +152,7 @@ MealPrepSunday.prototype.loadInventory = function() {
 
 MealPrepSunday.prototype.editIngredient = function(e) {
   e.preventDefault();
-  var target = e.target;
+  var target = e.target.parentNode;
   target.style.display = "none";
   target.nextSibling.style.display = "inline";
   var num = target.id;
@@ -234,11 +233,11 @@ MealPrepSunday.INGREDIENT_TEMPLATE =
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
-        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--raised">Edit</button>' +
-        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--raised" type="submit" style="display:none;">Submit</button>' +
+        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">edit</i></button>' +
+        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
       '</td>' +
       '<td class="mdl-data-table__cell">' +
-        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--raised">Remove</button>' +
+        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">remove</i></button>' +
       '</td>' +
     '</tr>';
 

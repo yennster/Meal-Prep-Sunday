@@ -23,26 +23,39 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.pink-light_blue.min.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.pink-indigo.min.css" />
     <link rel="stylesheet" href="styles/styles.css">
   </head>
   <body>
-    <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
-      <header class="demo-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
+      <header class="mdl-layout__header ">
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">Meal Prep Sunday</span>
           <div class="mdl-layout-spacer"></div>
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
-            <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
-              <i class="material-icons">search</i>
-            </label>
-            <div class="mdl-textfield__expandable-holder">
-              <input class="mdl-textfield__input" type="text" id="search">
-              <label class="mdl-textfield__label" for="search">Enter your query...</label>
-            </div>
+          <button hidden id="sign-in" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-color-text--white">
+            <i class="material-icons">account_circle</i> Sign-in with Google
+          </button>
+          <div id="login">
+            <div hidden id="user-pic"></div>
+            <div class="mdl-layout-spacer">&nbsp;&nbsp;</div>
+            <div hidden id="user-name"></div>
+            <div class="mdl-layout-spacer">&nbsp;</div>
+            <button hidden id="sign-in" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-color-text--white">
+              <i class="material-icons">account_circle</i> Sign-in with Google
+            </button>
+            <button id="sign-out" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
           </div>
         </div>
+        <div class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--pink-500">
+          <a href="" class="mdl-layout__tab is-active" id="home-selector">Home</a>
+          <a href="#recipes" class="mdl-layout__tab" id="recipe-selector">Recipes</a>
+          <a href="#grocery-list" class="mdl-layout__tab" id="grocery-selector">Grocery List</a>
+          <a href="#inventory" class="mdl-layout__tab" id="inventory-selector">Inventory</a>
+        </div>
       </header>
+      <!--
       <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
         <header class="demo-drawer-header">
           <div class="demo-avatar-dropdown">
@@ -66,43 +79,56 @@
           <div class="mdl-layout-spacer"></div>
         </nav>
       </div>
+    -->
       <main class="mdl-layout__content mdl-color--grey-100">
-        <div class="mdl-grid demo-content">
+        <div class="mdl-grid">
 
 
           <!-- Inventory/Ingredients List Div -->
-          <div id="Inventory" class="mdl-grid">
-            <div id="main_content" class="mdl-grid mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col">
-              <h4 class="mdl-cell mdl-cell--12-col">Inventory</h4>
-              <div class="mdl-cell mdl-cell--12-col">
-                <form id="inventory-form" action="#">
-                  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                    <input class="mdl-textfield__input" type="text" id="ingredient">
-                    <label class="mdl-textfield__label" for="ingredient">Add ingredient...</label>
-                  </div>
-                  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                    <input class="mdl-textfield__input" type="number" id="ingredient_amount">
-                    <label class="mdl-textfield__label" for="ingredient_amount">Amount</label>
-                  </div>
-                  <button id="add-ingredient" disabled type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-                    Add
-                  </button>
-                </form>
-              </div>
 
+
+          <div id="Inventory" class="mdl-grid">
+            <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp">
+          			<div class="mdl-card__title mdl-color--accent mdl-color-text--white">
+          				<h2 class="mdl-card__title-text">Add ingredient</h2>
+          			</div>
+          	  	<div class="mdl-card__supporting-text">
+          				<form id="inventory-form" action="#">
+          					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                      <input class="mdl-textfield__input" type="text" id="ingredient">
+                      <label class="mdl-textfield__label" for="ingredient">Add ingredient...</label>
+          					</div>
+          					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                      <input class="mdl-textfield__input" type="number" id="ingredient_amount">
+                      <label class="mdl-textfield__label" for="ingredient_amount">Amount</label>
+          					</div>
+          				</form>
+          			</div>
+          			<div class="mdl-card__actions mdl-card--border">
+          				<button id="add-ingredient" form="inventory-form" disabled type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Add</button>
+          			</div>
             </div>
-            <table class="mdl-cell mdl-cell--12-col mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-              <thead>
-                <tr>
-                  <th class="mdl-data-table__cell--non-numeric">Ingredient</th>
-                  <th class="mdl-data-table__cell--numeric">Amount</th>
-                  <th class="mdl-data-table__cell">Edit</th>
-                  <th class="mdl-data-table__cell">Remove</th>
-                </tr>
-              </thead>
-              <tbody id="inventory-list">
-              </tbody>
-            </table>
+            <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+                <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
+                  <h2 class="mdl-card__title-text">Inventory</h2>
+                </div>
+                <div class="mdl-card__supporting-text" style="padding:0;width:100%;">
+                  <table class="mdl-data-table mdl-js-data-table" style="width:100%;" id='inventory-table'>
+                    <thead>
+                      <tr>
+                        <th class="mdl-data-table__cell--non-numeric">Ingredient</th>
+                        <th class="mdl-data-table__cell--numeric">Amount</th>
+                        <th class="mdl-data-table__cell">Edit</th>
+                        <th class="mdl-data-table__cell">Remove</th>
+                      </tr>
+                    </thead>
+                    <tbody id="inventory-list">
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+
+
           </div>
           <!-- end Inventory div -->
 
