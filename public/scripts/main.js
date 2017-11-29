@@ -2,32 +2,38 @@
 
 // Initializes MealPrepSunday.
 function MealPrepSunday() {
-  document.getElementById("Inventory").style.visibility = "hidden";
-  $("#inventory-selector").click(function(event){
-    document.getElementById("Inventory").style.visibility = "visible";
-  });
   // Shortcuts to DOM Elements.
   this.userName = document.getElementById('user-name');
   this.userPic = document.getElementById('user-pic');
   this.signInButton = document.getElementById('sign-in');
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
+
   this.inventoryForm = document.getElementById('inventory-form');
   this.inventoryList = document.getElementById('inventory-list');
   this.ingredientInput = document.getElementById('ingredient');
   this.ingredientAmount = document.getElementById('ingredient_amount');
   this.addIngredient = document.getElementById('add-ingredient');
 
-  this.recipeList = document.getElementById('recipe-list');
   this.recipeForm = document.getElementById('recipe-form');
+  this.recipeList = document.getElementById('recipe-list');
+  this.recipeName = document.getElementById('recipe_name');
+  this.recipeInput = document.getElementById('recipe');
+  this.recipeIngredient = document.getElementById('recipe_ingredient');
+  this.recipeIngredientAmt = document.getElementById('recipe_ingredient_amount');
+  this.addRecipe = document.getElementById('add-recipe');
 
   var buttonTogglingHandler = this.toggleButton.bind(this);
   this.ingredientInput.addEventListener('keyup', buttonTogglingHandler);
   this.ingredientInput.addEventListener('change', buttonTogglingHandler);
   this.ingredientAmount.addEventListener('keyup', buttonTogglingHandler);
   this.ingredientAmount.addEventListener('change', buttonTogglingHandler);
+  this.recipeInput.addEventListener('keyup', buttonTogglingHandler);
+  this.recipeInput.addEventListener('change', buttonTogglingHandler);
 
   this.inventoryForm.addEventListener('submit', this.saveIngredient.bind(this));
+  this.recipeForm.addEventListener('submit', this.saveRecipe.bind(this));
+
   this.signOutButton.addEventListener('click', this.signOut.bind(this));
   this.signInButton.addEventListener('click', this.signIn.bind(this));
 
@@ -81,6 +87,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     this.signOutButton.removeAttribute('hidden');
 
     this.loadInventory();
+    this.loadRecipes();
 
     $(document).on('click', '.inventory-edit', this.editIngredient.bind(this));
     $(document).on('click', '.inventory-remove', this.removeIngredient.bind(this));
@@ -186,7 +193,8 @@ MealPrepSunday.prototype.editIngredient = function(e) {
 };
 
 MealPrepSunday.prototype.removeIngredient = function(e) {
-  var target = e.target;
+  var target = e.target.parentNode;
+  console.log(target)
   var num = target.id;
   var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
@@ -214,11 +222,66 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   this.inventoryList.appendChild(container);
 };
 
+MealPrepSunday.prototype.saveRecipe = function(e) {
+  e.preventDefault();
+
+  if (this.recipeInput.value) {
+    var currentUser = this.auth.currentUser.uid;
+    this.recipeRef = this.database.ref(currentUser + "/recipes");
+    this.recipeRef.push({
+      name: this.recipeName.value,
+      recipe: this.recipeInput.value,
+      ingredient: this.recipeIngredient.value,
+      amount: this.recipeIngredientAmt.value,
+    }).then(function() {
+      // Clear message text field and SEND button state.
+      MealPrepSunday.resetMaterialTextfield(this.recipeName);
+      MealPrepSunday.resetMaterialTextfield(this.recipeInput);
+      MealPrepSunday.resetMaterialTextfield(this.recipeIngredient);
+      MealPrepSunday.resetMaterialTextfield(this.recipeIngredientAmt);
+      this.toggleButton();
+    }.bind(this)).catch(function(error) {
+      console.error('Error writing new message to Firebase Database', error);
+    });
+  }
+};
+
+MealPrepSunday.prototype.loadRecipes = function() {
+  var currentUser = this.auth.currentUser.uid;
+  this.recipeRef = this.database.ref(currentUser + "/recipes");
+  this.recipeRef.off();
+  var numRecipes = 0;
+  var setRecipe = function(data) {
+    var val = data.val();
+    this.displayRecipes(data.key, val.name, val.recipe, val.ingredient, val.amount, numRecipes);
+    numRecipes++;
+  }.bind(this);
+  this.recipeRef.on('child_added', setRecipe);
+};
+
+MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient, amount, num) {
+  var container = document.createElement('div');
+  container.innerHTML = MealPrepSunday.RECIPE_TEMPLATE;
+  container.setAttribute('id', key);
+  container.className += "mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+  var title = container.firstChild.firstChild;
+  title.setAttribute('id', "name" + num);
+  title.textContent = name;
+  var rcp = container.firstChild.nextSibling;
+  console.log(title);
+  console.log(rcp);
+  rcp.setAttribute('id', "recipe" + num);
+  rcp.innerHTML = "<pre>" + recipe + "</pre>" + "<p></p>Ingredient: " + ingredient + ", Amount: " + amount;
+  this.recipeList.appendChild(container);
+};
+
 MealPrepSunday.prototype.toggleButton = function() {
-  if (this.ingredientInput.value) {
+  if (this.ingredientInput.value || this.recipeInput.value) {
     this.addIngredient.removeAttribute('disabled');
+    this.addRecipe.removeAttribute('disabled');
   } else {
     this.addIngredient.setAttribute('disabled', 'true');
+    this.addRecipe.setAttribute('disabled', 'true');
   }
 };
 
@@ -240,6 +303,12 @@ MealPrepSunday.INGREDIENT_TEMPLATE =
         '<button class="inventory-remove mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">remove</i></button>' +
       '</td>' +
     '</tr>';
+
+MealPrepSunday.RECIPE_TEMPLATE =
+    '<div class="mdl-card__title mdl-color--accent mdl-color-text--white">' +
+      '<h2 class="mdl-card__title-text"></h2>' +
+    '</div>' +
+    '<div class="recipe-data mdl-card__supporting-text"></div>';
 
 /**
 '<td class="ingred mdl-data-table__cell--non-nurmeric">' +

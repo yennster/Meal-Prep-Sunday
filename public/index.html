@@ -21,126 +21,191 @@
 
     <script src="https://www.gstatic.com/firebasejs/4.5.2/firebase.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster|Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.pink-indigo.min.css" />
     <link rel="stylesheet" href="styles/styles.css">
   </head>
   <body>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
-      <header class="mdl-layout__header ">
+
+      <!-- Header -->
+      <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">Meal Prep Sunday</span>
           <div class="mdl-layout-spacer"></div>
-          <button hidden id="sign-in" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-color-text--white">
-            <i class="material-icons">account_circle</i> Sign-in with Google
-          </button>
-          <div id="login">
-            <div hidden id="user-pic"></div>
-            <div class="mdl-layout-spacer">&nbsp;&nbsp;</div>
-            <div hidden id="user-name"></div>
-            <div class="mdl-layout-spacer">&nbsp;</div>
+          <div class="mdl-navigation" id="login">
+            <span class="mdl-navigation mdl-layout--large-screen-only">
+              <div hidden id="user-pic"></div>
+              <div class="mdl-layout-spacer">&nbsp;&nbsp;</div>
+              <div hidden id="user-name"></div>
+              <div class="mdl-layout-spacer">&nbsp;</div>
+            </span>
             <button hidden id="sign-in" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-color-text--white">
-              <i class="material-icons">account_circle</i> Sign-in with Google
+              <i class="material-icons">account_circle</i> Sign-in
             </button>
             <button id="sign-out" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" >
               <i class="material-icons">exit_to_app</i>
             </button>
           </div>
         </div>
-        <div class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--pink-500">
-          <a href="" class="mdl-layout__tab is-active" id="home-selector">Home</a>
-          <a href="#recipes" class="mdl-layout__tab" id="recipe-selector">Recipes</a>
-          <a href="#grocery-list" class="mdl-layout__tab" id="grocery-selector">Grocery List</a>
-          <a href="#inventory" class="mdl-layout__tab" id="inventory-selector">Inventory</a>
+        <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+          <a href="#Home" class="mdl-layout__tab is-active">Home</a>
+          <a href="#Recipes" class="mdl-layout__tab">Recipes</a>
+          <a href="#Grocery-List" class="mdl-layout__tab">Grocery List</a>
+          <a href="#Inventory" class="mdl-layout__tab">Inventory</a>
         </div>
       </header>
-      <!--
-      <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
-        <header class="demo-drawer-header">
-          <div class="demo-avatar-dropdown">
-            <div hidden id="user-pic"></div>
-            <div class="mdl-layout-spacer"></div>
-            <div hidden id="user-name"></div>
-            <div class="mdl-layout-spacer"></div>
-            <button hidden id="sign-in" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-color-text--white">
-              <i class="material-icons">account_circle</i> Sign-in with Google
-            </button>
-            <button id="sign-out" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" >
-              <i class="material-icons">exit_to_app</i>
-            </button>
-          </div>
-        </header>
-        <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-          <a class="mdl-navigation__link" id="home-selector"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
-          <a class="mdl-navigation__link" id="recipe-selector"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">inbox</i>Recipes</a>
-          <a class="mdl-navigation__link" id="grocery-selector"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>Grocery List</a>
-          <a class="mdl-navigation__link" id="inventory-selector"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">format_list_numbered</i>Inventory</a>
-          <div class="mdl-layout-spacer"></div>
-        </nav>
-      </div>
-    -->
-      <main class="mdl-layout__content mdl-color--grey-100">
-        <div class="mdl-grid">
 
+      <!-- Main Content -->
+      <main class="mdl-layout__content mdl-color--grey-100" style="flex: 1 0 auto; padding-bottom:150px;">
 
-          <!-- Inventory/Ingredients List Div -->
+        <!-- Home -->
+        <section class="mdl-layout__tab-panel is-active" id="Home">
+        </section>
 
-
-          <div id="Inventory" class="mdl-grid">
-            <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp">
-          			<div class="mdl-card__title mdl-color--accent mdl-color-text--white">
-          				<h2 class="mdl-card__title-text">Add ingredient</h2>
-          			</div>
-          	  	<div class="mdl-card__supporting-text">
-          				<form id="inventory-form" action="#">
-          					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                      <input class="mdl-textfield__input" type="text" id="ingredient">
-                      <label class="mdl-textfield__label" for="ingredient">Add ingredient...</label>
-          					</div>
-          					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                      <input class="mdl-textfield__input" type="number" id="ingredient_amount">
-                      <label class="mdl-textfield__label" for="ingredient_amount">Amount</label>
-          					</div>
-          				</form>
-          			</div>
-          			<div class="mdl-card__actions mdl-card--border">
-          				<button id="add-ingredient" form="inventory-form" disabled type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Add</button>
-          			</div>
-            </div>
+        <!-- Recipes -->
+        <section class="mdl-layout__tab-panel" id="Recipes">
+          <div class="mdl-grid">
             <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
                 <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
-                  <h2 class="mdl-card__title-text">Inventory</h2>
+                  <h2 class="mdl-card__title-text">Create a new recipe</h2>
                 </div>
-                <div class="mdl-card__supporting-text" style="padding:0;width:100%;">
-                  <table class="mdl-data-table mdl-js-data-table" style="width:100%;" id='inventory-table'>
-                    <thead>
-                      <tr>
-                        <th class="mdl-data-table__cell--non-numeric">Ingredient</th>
-                        <th class="mdl-data-table__cell--numeric">Amount</th>
-                        <th class="mdl-data-table__cell">Edit</th>
-                        <th class="mdl-data-table__cell">Remove</th>
-                      </tr>
-                    </thead>
-                    <tbody id="inventory-list">
-                    </tbody>
-                  </table>
+                <div class="mdl-card__supporting-text">
+                  <form id="recipe-form" action="#">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                      <input class="mdl-textfield__input" type="text" id="recipe_name">
+                      <label class="mdl-textfield__label" for="recipe_name">Recipe Name</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                      <textarea class="mdl-textfield__input" type="text" rows="7" id="recipe"></textarea>
+                      <label class="mdl-textfield__label" for="recipe">Recipe</label>
+                    </div>
+                    <div id="recipe-ingredients">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="recipe_ingredient">
+                        <label class="mdl-textfield__label" for="recipe_ingredient">Ingredient</label>
+                      </div>
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="number" id="recipe_ingredient_amount">
+                        <label class="mdl-textfield__label" for="recipe_ingredient_amount">Amount</label>
+                      </div>
+                      <!--<button class="add-recipe-ingredient mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">add</i></button>-->
+                    </div>
+                  </form>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                  <button id="add-recipe" form="recipe-form" disabled type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Create</button>
                 </div>
             </div>
-
-
           </div>
-          <!-- end Inventory div -->
+          <div class="mdl-grid" id="recipe-list">
+          </div>
+        </section>
 
+        <!-- Grocery-List -->
+        <section class="mdl-layout__tab-panel" id="Grocery-List">
+        </section>
 
-        </div>
+        <!-- Inventory/Ingredients -->
+        <section class="mdl-layout__tab-panel" id="Inventory">
+            <div class="mdl-grid">
+              <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp">
+                  <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
+                    <h2 class="mdl-card__title-text">Add ingredient</h2>
+                  </div>
+                  <div class="mdl-card__supporting-text">
+                    <form id="inventory-form" action="#">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                        <input class="mdl-textfield__input" type="text" id="ingredient">
+                        <label class="mdl-textfield__label" for="ingredient">Ingredient</label>
+                      </div>
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                        <input class="mdl-textfield__input" type="number" id="ingredient_amount">
+                        <label class="mdl-textfield__label" for="ingredient_amount">Amount</label>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="mdl-card__actions mdl-card--border">
+                    <button id="add-ingredient" form="inventory-form" disabled type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Add</button>
+                  </div>
+              </div>
+              <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+                  <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
+                    <h2 class="mdl-card__title-text">Inventory</h2>
+                  </div>
+                  <div class="mdl-card__supporting-text" style="padding:0;width:100%;">
+                    <table class="mdl-data-table mdl-js-data-table" style="width:100%;" id='inventory-table'>
+                      <thead>
+                        <tr>
+                          <th class="mdl-data-table__cell--non-numeric">Ingredient</th>
+                          <th class="mdl-data-table__cell--numeric">Amount</th>
+                          <th class="mdl-data-table__cell">Edit</th>
+                          <th class="mdl-data-table__cell">Remove</th>
+                        </tr>
+                      </thead>
+                      <tbody id="inventory-list">
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
+            </div>
+        </section>
+
+        <!-- About -->
+        <!--
+        <section class="mdl-layout__tab-panel" id="About">
+            <div class="mdl-grid">
+              <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+                <div class="demo-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                  <h3>About</h3>
+                    <p>
+                      Cillum dolor esse sit incididunt velit eiusmod magna ad nostrud officia aute dolor dolor. Magna esse ullamco pariatur adipisicing consectetur eu commodo officia. Ex cillum consequat mollit minim elit est deserunt occaecat nisi amet. Quis aliqua nostrud Lorem occaecat sunt. Eiusmod quis amet ullamco aliquip dolore ut incididunt duis adipisicing. Elit consequat nisi eiusmod aute ipsum sunt veniam do est. Occaecat mollit aliquip ut proident consectetur amet ex dolore consectetur aliqua elit.
+                    </p>
+                    <p>
+                      Commodo nisi non consectetur voluptate incididunt mollit duis dolore amet amet tempor exercitation. Qui amet aute ea aute id ad aliquip proident. Irure duis qui labore deserunt enim in quis nisi sint consequat aliqua. Ex proident labore et laborum tempor fugiat sint magna veniam minim. Nulla dolor labore adipisicing in enim mollit laboris fugiat eu. Aliquip minim cillum ullamco voluptate non dolore non ex duis fugiat duis ad. Deserunt cillum ad et nisi amet non voluptate culpa qui do. Labore ullamco et minim proident est laborum mollit ad labore deserunt ut irure dolore. Reprehenderit ad ad irure ut irure qui est eu velit eu excepteur adipisicing culpa. Laborum cupidatat ullamco eu duis anim reprehenderit proident aute ad consectetur eiusmod.
+                    </p>
+                    <p>
+                      Tempor tempor aliqua in commodo cillum Lorem magna dolore proident Lorem. Esse ad consequat est excepteur irure eu irure quis aliqua qui. Do mollit esse veniam excepteur ut veniam anim minim dolore sit commodo consequat duis commodo. Sunt dolor reprehenderit ipsum minim eiusmod eu consectetur anim excepteur eiusmod. Duis excepteur anim dolor sit enim veniam deserunt anim adipisicing Lorem elit. Cillum sunt do consequat elit laboris nisi consectetur.
+                    </p>
+                  <h3>Basic MDL Usage</h3>
+                    <p>
+                      Cillum dolor esse sit incididunt velit eiusmod magna ad nostrud officia aute dolor dolor. Magna esse ullamco pariatur adipisicing consectetur eu commodo officia. Ex cillum consequat mollit minim elit est deserunt occaecat nisi amet. Quis aliqua nostrud Lorem occaecat sunt. Eiusmod quis amet ullamco aliquip dolore ut incididunt duis adipisicing. Elit consequat nisi eiusmod aute ipsum sunt veniam do est. Occaecat mollit aliquip ut proident consectetur amet ex dolore consectetur aliqua elit.
+                    </p>
+                    <p>
+                      Commodo nisi non consectetur voluptate incididunt mollit duis dolore amet amet tempor exercitation. Qui amet aute ea aute id ad aliquip proident. Irure duis qui labore deserunt enim in quis nisi sint consequat aliqua. Ex proident labore et laborum tempor fugiat sint magna veniam minim. Nulla dolor labore adipisicing in enim mollit laboris fugiat eu. Aliquip minim cillum ullamco voluptate non dolore non ex duis fugiat duis ad. Deserunt cillum ad et nisi amet non voluptate culpa qui do. Labore ullamco et minim proident est laborum mollit ad labore deserunt ut irure dolore. Reprehenderit ad ad irure ut irure qui est eu velit eu excepteur adipisicing culpa. Laborum cupidatat ullamco eu duis anim reprehenderit proident aute ad consectetur eiusmod.
+                    </p>
+                    <p>
+                      Cillum dolor esse sit incididunt velit eiusmod magna ad nostrud officia aute dolor dolor. Magna esse ullamco pariatur adipisicing consectetur eu commodo officia. Ex cillum consequat mollit minim elit est deserunt occaecat nisi amet. Quis aliqua nostrud Lorem occaecat sunt. Eiusmod quis amet ullamco aliquip dolore ut incididunt duis adipisicing. Elit consequat nisi eiusmod aute ipsum sunt veniam do est. Occaecat mollit aliquip ut proident consectetur amet ex dolore consectetur aliqua elit.
+                    </p>
+                    <p>
+                      Commodo nisi non consectetur voluptate incididunt mollit duis dolore amet amet tempor exercitation. Qui amet aute ea aute id ad aliquip proident. Irure duis qui labore deserunt enim in quis nisi sint consequat aliqua. Ex proident labore et laborum tempor fugiat sint magna veniam minim. Nulla dolor labore adipisicing in enim mollit laboris fugiat eu. Aliquip minim cillum ullamco voluptate non dolore non ex duis fugiat duis ad. Deserunt cillum ad et nisi amet non voluptate culpa qui do. Labore ullamco et minim proident est laborum mollit ad labore deserunt ut irure dolore. Reprehenderit ad ad irure ut irure qui est eu velit eu excepteur adipisicing culpa. Laborum cupidatat ullamco eu duis anim reprehenderit proident aute ad consectetur eiusmod.
+                    </p>
+                </div>
+              </div>
+            </div>
+        </section>
+      -->
 
         <div id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
           <div class="mdl-snackbar__text"></div>
           <button class="mdl-snackbar__action" type="button"></button>
         </div>
       </main>
+
+      <!-- Footer -->
+      <footer class="mdl-mini-footer" style="flex: 0 0 auto;">
+        <div class="mdl-mini-footer__left-section">
+          <div class="mdl-logo">Meal Prep Sunday</div>
+          <ul class="mdl-mini-footer__link-list">
+            <li><a href="#Help">Help</a></li>
+            <li><a href="#About">About</a></li>
+          </ul>
+        </div>
+      </footer>
     </div>
+
+
     <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <script src="scripts/main.js"></script>
   </body>
