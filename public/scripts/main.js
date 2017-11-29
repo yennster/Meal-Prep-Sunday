@@ -109,12 +109,12 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
       var groceryTable = document.getElementById("grocery-table");
       var newWin = window.open("");
       newWin.document.write("<html><head><title>Meal Prep Sunday - Grocery List</title>")
-      newWin.document.write("<link rel='stylesheet' media='all' href='//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>");
-      newWin.document.write("<link rel='stylesheet' media='all' href='//fonts.googleapis.com/css?family=Lobster|Roboto'></head>");
+      newWin.document.write("<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>");
+      newWin.document.write("<link rel='stylesheet' href='//fonts.googleapis.com/css?family=Lobster|Roboto'></head>");
       var today = new Date().toLocaleDateString("en-US");
       newWin.document.write("<body><h2>Meal Prep Sunday</h2><h5>Grocery List (" + today + ")</h5><table class='u-full-width'>");
       newWin.document.write(groceryTable.innerHTML);
-      newWin.document.write("</table><style> h2{font-family: 'Lobster';} th:nth-child(3){display:none;} td:nth-child(3){display:none;}" +
+      newWin.document.write("</table><style>h2{font-family: 'Lobster';} th:nth-child(3){display:none;} td:nth-child(3){display:none;}" +
                             "th:nth-child(4){display:none;} td:nth-child(4){display:none;}</style></body></html>");
       newWin.document.close();
       newWin.focus();
@@ -195,6 +195,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   target.style.display = "none";
   target.nextSibling.style.display = "inline";
   $('.inventory-edit').prop('disabled', true);
+  $('.inventory-remove').prop('disabled', true);
   var num = target.id.substring(4);
   var key = target.parentNode.parentNode.id;
   var ingredient = document.getElementById("name" + num);
@@ -218,6 +219,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
       target.style.display = "inline";
       target.nextSibling.style.display = "none";
       $('.inventory-edit').prop('disabled', false);
+      $('.inventory-remove').prop('disabled', false);
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
     });
@@ -248,8 +250,8 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   td3.setAttribute('id', "edit" + num);
   td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
   td3.setAttribute('id', "save" + num);
-  var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
-  td4.setAttribute('id', "remove" + num);
+  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+  td3.setAttribute('id', "remove" + num);
   this.inventoryList.appendChild(container);
 };
 
@@ -341,6 +343,7 @@ MealPrepSunday.prototype.editItem = function(e) {
   target.style.display = "none";
   target.nextSibling.style.display = "inline";
   $('.grocery-edit').prop('disabled', true);
+  $('.grocery-remove').prop('disabled', true);
   var num = target.id.substring(9);
   var key = target.parentNode.parentNode.id;
   var item = document.getElementById("item_name" + num);
@@ -364,6 +367,7 @@ MealPrepSunday.prototype.editItem = function(e) {
       target.style.display = "inline";
       target.nextSibling.style.display = "none";
       $('.grocery-edit').prop('disabled', false);
+      $('.grocery-remove').prop('disabled', false);
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
     });
@@ -372,7 +376,7 @@ MealPrepSunday.prototype.editItem = function(e) {
 
 MealPrepSunday.prototype.removeItem = function(e) {
   var target = e.target.parentNode;
-  var num = target.id;
+  var num = target.id.substring(11);
   var key = target.parentNode.parentNode.id;
   document.getElementById("item_name" + num + "").parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
@@ -394,8 +398,8 @@ MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, num) {
   td3.setAttribute('id', "item_edit" + num);
   td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
   td3.setAttribute('id', "item_save" + num);
-  var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
-  td4.setAttribute('id', "item_remove" + num);
+  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+  td3.setAttribute('id', "item_remove" + num);
   this.groceryList.appendChild(container);
 };
 
@@ -422,11 +426,9 @@ MealPrepSunday.INGREDIENT_TEMPLATE =
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
-        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">edit</i></button>' +
-        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
-      '</td>' +
-      '<td class="mdl-data-table__cell">' +
-        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">remove</i></button>' +
+        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
       '</td>' +
     '</tr>';
 
@@ -434,18 +436,21 @@ MealPrepSunday.RECIPE_TEMPLATE =
     '<div class="mdl-card__title mdl-color--accent mdl-color-text--white">' +
       '<h2 class="mdl-card__title-text"></h2>' +
     '</div>' +
-    '<div class="recipe-data mdl-card__supporting-text"></div>';
+    '<div class="recipe-data mdl-card__supporting-text mdl-card--expand"></div>' +
+    '<div class="mdl-card__actions mdl-card--border">' +
+      '<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+      '<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+      '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
+    '</div>';
 
 MealPrepSunday.GROCERY_LIST_TEMPLATE =
     '<tr>' +
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
-        '<button class="grocery-edit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">edit</i></button>' +
-        '<button class="grocery-submit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
-      '</td>' +
-      '<td class="mdl-data-table__cell">' +
-        '<button class="grocery-remove mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">remove</i></button>' +
+        '<button class="grocery-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+        '<button class="grocery-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+        '<button class="grocery-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
       '</td>' +
     '</tr>';
 
