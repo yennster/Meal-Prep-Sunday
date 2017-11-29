@@ -176,7 +176,7 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
 
   if (this.ingredientInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
-    this.inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
+    this.inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
     this.inventoryRef.push({
       ingredient: this.ingredientInput.value,
       amount: this.ingredientAmount.value,
@@ -192,7 +192,7 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
 
 MealPrepSunday.prototype.loadInventory = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
+  this.inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
   this.inventoryRef.off();
   var numIngredients = 0;
   var setIngredient = function(data) {
@@ -222,7 +222,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
                           + current_amt + "' id='new_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
-  var inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
+  var inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
   $("#save" + num).on("click", function(e) {
     e.preventDefault();
     var new_ingred = document.getElementById("new_name" + num).value;
@@ -249,7 +249,7 @@ MealPrepSunday.prototype.removeIngredient = function(e) {
   var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
-  this.inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
+  this.inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
   this.inventoryRef.child(key).remove();
 };
 
@@ -291,7 +291,7 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
 
   if (this.recipeInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
-    this.recipeRef = this.database.ref("users/" + currentUser + "/recipes");
+    this.recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
     var recipeKey = this.recipeRef.push().key;
     var recipeData = {
       name: this.recipeName.value,
@@ -310,7 +310,7 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       }
       updates['/public-recipes/' + recipeKey] = publicData;
     }
-    updates[currentUser + "/recipes/" + recipeKey] = recipeData;
+    updates["/users/" + currentUser + "/recipes/" + recipeKey] = recipeData;
     this.database.ref().update(updates).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
@@ -331,13 +331,17 @@ MealPrepSunday.prototype.removeRecipe = function(e) {
   var key = target.parentNode.parentNode.id;
   document.getElementById("recipe_name" + num + "").parentNode.parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
-  this.recipeRef = this.database.ref("users/" + currentUser + "/recipes");
-  this.recipeRef.child(key).remove();
+  var updates = {};
+  updates['/public-recipes/' + key] = null;
+  updates["/users/" + currentUser + "/recipes/" + key] = null;
+  //this.recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
+  //this.recipeRef.child(key).remove();
+  this.database.ref().update(updates);
 };
 
 MealPrepSunday.prototype.loadRecipes = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.recipeRef = this.database.ref("users/" + currentUser + "/recipes");
+  this.recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
   this.recipeRef.off();
   var numRecipes = 0;
   var setRecipe = function(data) {
@@ -421,7 +425,7 @@ MealPrepSunday.prototype.saveItem = function(e) {
 
   if (this.itemInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
-    this.groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
+    this.groceryRef = this.database.ref("/users/" + currentUser + "/grocery-list");
     this.groceryRef.push({
       item: this.itemInput.value,
       amount: this.itemAmount.value,
@@ -437,7 +441,7 @@ MealPrepSunday.prototype.saveItem = function(e) {
 
 MealPrepSunday.prototype.loadGroceryList = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
+  this.groceryRef = this.database.ref("/users/" + currentUser + "/grocery-list");
   this.groceryRef.off();
   var numItems = 0;
   var setItem = function(data) {
@@ -466,7 +470,7 @@ MealPrepSunday.prototype.editItem = function(e) {
   amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
                     + current_amt + "' id='new_item_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
-  var groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
+  var groceryRef = this.database.ref("/users/" + currentUser + "/grocery-list");
   $("#item_save" + num).on('click', function(e) {
     e.preventDefault();
     var new_item = document.getElementById("new_item_name" + num).value;
@@ -493,7 +497,7 @@ MealPrepSunday.prototype.removeItem = function(e) {
   var key = target.parentNode.parentNode.id;
   document.getElementById("item_name" + num + "").parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
-  this.groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
+  this.groceryRef = this.database.ref("/users/" + currentUser + "/grocery-list");
   this.groceryRef.child(key).remove();
 };
 
@@ -539,10 +543,10 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      var recipeKey = val.recipe;
      var userID = val.user;
      var mps = this;
-     this.database.ref("users/" + userID + "/recipes/" + recipeKey).once('value').then(function(snapshot) {
+     this.database.ref("/users/" + userID + "/recipes/" + recipeKey).once('value').then(function(snapshot) {
         var rcp = snapshot.val();
+        if (rcp == null) return;
         mps.displayPublicRecipes(rcp.key, rcp.name, rcp.recipe, rcp.ingredient, rcp.amount, rcp.units, numRecipes);
-        //return snapshot.val();
       });
       numRecipes++;
    }.bind(this);
