@@ -33,7 +33,7 @@ html, body {
 
 @media screen and (max-width: 851px) {
   .mdl-layout__header-row {
-    padding: 0 40px 0 40px;
+    padding: 0 30px 0 30px;
   }
 }
 
@@ -42,3 +42,5 @@ html, body {
     padding: 0 72px 0 72px;
   }
 }
+
+.none { display: none; }

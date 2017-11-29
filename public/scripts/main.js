@@ -15,6 +15,12 @@ function MealPrepSunday() {
   this.ingredientAmount = document.getElementById('ingredient_amount');
   this.addIngredient = document.getElementById('add-ingredient');
 
+  this.groceryForm = document.getElementById('grocery-form');
+  this.groceryList = document.getElementById('grocery-list');
+  this.itemInput = document.getElementById('item');
+  this.itemAmount = document.getElementById('item_amount');
+  this.addGroceryItem = document.getElementById('add-grocery-item');
+
   this.recipeForm = document.getElementById('recipe-form');
   this.recipeList = document.getElementById('recipe-list');
   this.recipeName = document.getElementById('recipe_name');
@@ -30,9 +36,12 @@ function MealPrepSunday() {
   this.ingredientAmount.addEventListener('change', buttonTogglingHandler);
   this.recipeInput.addEventListener('keyup', buttonTogglingHandler);
   this.recipeInput.addEventListener('change', buttonTogglingHandler);
+  this.itemInput.addEventListener('keyup', buttonTogglingHandler);
+  this.itemInput.addEventListener('change', buttonTogglingHandler);
 
   this.inventoryForm.addEventListener('submit', this.saveIngredient.bind(this));
   this.recipeForm.addEventListener('submit', this.saveRecipe.bind(this));
+  this.groceryForm.addEventListener('submit', this.saveItem.bind(this));
 
   this.signOutButton.addEventListener('click', this.signOut.bind(this));
   this.signInButton.addEventListener('click', this.signIn.bind(this));
@@ -88,9 +97,32 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
     this.loadInventory();
     this.loadRecipes();
+    this.loadGroceryList();
 
     $(document).on('click', '.inventory-edit', this.editIngredient.bind(this));
     $(document).on('click', '.inventory-remove', this.removeIngredient.bind(this));
+
+    $(document).on('click', '.grocery-edit', this.editItem.bind(this));
+    $(document).on('click', '.grocery-remove', this.removeItem.bind(this));
+
+    $('#print-grocery-list').on('click',function(){
+      var groceryTable = document.getElementById("grocery-table");
+      var newWin = window.open("");
+      newWin.document.write("<html><head><title>Meal Prep Sunday - Grocery List</title>")
+      newWin.document.write("<link rel='stylesheet' media='all' href='//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>");
+      newWin.document.write("<link rel='stylesheet' media='all' href='//fonts.googleapis.com/css?family=Lobster|Roboto'></head>");
+      var today = new Date().toLocaleDateString("en-US");
+      newWin.document.write("<body><h2>Meal Prep Sunday</h2><h5>Grocery List (" + today + ")</h5><table class='u-full-width'>");
+      newWin.document.write(groceryTable.innerHTML);
+      newWin.document.write("</table><style> h2{font-family: 'Lobster';} th:nth-child(3){display:none;} td:nth-child(3){display:none;}" +
+                            "th:nth-child(4){display:none;} td:nth-child(4){display:none;}</style></body></html>");
+      newWin.document.close();
+      newWin.focus();
+      newWin.document.body.onload = function() {
+        newWin.print();
+        newWin.close();
+      };
+    });
 
     // Hide sign-in button.
     this.signInButton.setAttribute('hidden', 'true');
@@ -162,7 +194,8 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   var target = e.target.parentNode;
   target.style.display = "none";
   target.nextSibling.style.display = "inline";
-  var num = target.id;
+  $('.inventory-edit').prop('disabled', true);
+  var num = target.id.substring(4);
   var key = target.parentNode.parentNode.id;
   var ingredient = document.getElementById("name" + num);
   var amount = document.getElementById("amount" + num);
@@ -172,7 +205,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='" + current_amt + "' id='new_amount" + num + "'>"
   var currentUser = this.auth.currentUser.uid;
   var inventoryRef = this.database.ref(currentUser + "/inventory");
-  target.nextSibling.addEventListener("click", function(e) {
+  $("#save" + num).on("click", function(e) {
     e.preventDefault();
     var new_ingred = document.getElementById("new_name" + num).value;
     var new_amt = document.getElementById("new_amount" + num).value;
@@ -184,6 +217,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
       document.getElementById("amount" + num).innerHTML = new_amt;
       target.style.display = "inline";
       target.nextSibling.style.display = "none";
+      $('.inventory-edit').prop('disabled', false);
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
     });
@@ -192,7 +226,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
 
 MealPrepSunday.prototype.removeIngredient = function(e) {
   var target = e.target.parentNode;
-  var num = target.id;
+  var num = target.id.substring(6);
   var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
@@ -211,9 +245,11 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   td2.setAttribute('id', "amount" + num);
   td2.textContent = amount;
   var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
-  td3.setAttribute('id', num);
+  td3.setAttribute('id', "edit" + num);
+  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+  td3.setAttribute('id', "save" + num);
   var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
-  td4.setAttribute('id', num);
+  td4.setAttribute('id', "remove" + num);
   this.inventoryList.appendChild(container);
 };
 
@@ -267,13 +303,111 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   this.recipeList.appendChild(container);
 };
 
+MealPrepSunday.prototype.saveItem = function(e) {
+  e.preventDefault();
+
+  if (this.itemInput.value && this.checkSignedInWithMessage()) {
+    var currentUser = this.auth.currentUser.uid;
+    this.groceryRef = this.database.ref(currentUser + "/grocery-list");
+    this.groceryRef.push({
+      item: this.itemInput.value,
+      amount: this.itemAmount.value,
+    }).then(function() {
+      MealPrepSunday.resetMaterialTextfield(this.itemInput);
+      MealPrepSunday.resetMaterialTextfield(this.itemAmount);
+      this.toggleButton();
+    }.bind(this)).catch(function(error) {
+      console.error('Error writing new message to Firebase Database', error);
+    });
+  }
+};
+
+MealPrepSunday.prototype.loadGroceryList = function() {
+  var currentUser = this.auth.currentUser.uid;
+  this.groceryRef = this.database.ref(currentUser + "/grocery-list");
+  this.groceryRef.off();
+  var numItems = 0;
+  var setItem = function(data) {
+    var val = data.val();
+    this.displayGroceryList(data.key, val.item, val.amount, numItems);
+    numItems++;
+  }.bind(this);
+  this.groceryRef.on('child_added', setItem);
+};
+
+MealPrepSunday.prototype.editItem = function(e) {
+  e.preventDefault();
+  var target = e.target.parentNode;
+  target.style.display = "none";
+  target.nextSibling.style.display = "inline";
+  $('.grocery-edit').prop('disabled', true);
+  var num = target.id.substring(9);
+  var key = target.parentNode.parentNode.id;
+  var item = document.getElementById("item_name" + num);
+  var amount = document.getElementById("item_amount" + num);
+  var name = item.textContent;
+  var current_amt = amount.textContent;
+  item.innerHTML = "<input class='mdl-textfield__input' type='text' value='" + name + "' id='new_item_name" + num + "'>"
+  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='" + current_amt + "' id='new_item_amount" + num + "'>"
+  var currentUser = this.auth.currentUser.uid;
+  var groceryRef = this.database.ref(currentUser + "/grocery-list");
+  $("#item_save" + num).on('click', function(e) {
+    e.preventDefault();
+    var new_item = document.getElementById("new_item_name" + num).value;
+    var new_item_amt = document.getElementById("new_item_amount" + num).value;
+    groceryRef.child(key).set({
+      item: new_item,
+      amount: new_item_amt,
+    }).then(function() {
+      document.getElementById("item_name" + num).innerHTML = new_item;
+      document.getElementById("item_amount" + num).innerHTML = new_item_amt;
+      target.style.display = "inline";
+      target.nextSibling.style.display = "none";
+      $('.grocery-edit').prop('disabled', false);
+    }.bind(this)).catch(function(error) {
+      console.error('Error writing new message to Firebase Database', error);
+    });
+  });
+};
+
+MealPrepSunday.prototype.removeItem = function(e) {
+  var target = e.target.parentNode;
+  var num = target.id;
+  var key = target.parentNode.parentNode.id;
+  document.getElementById("item_name" + num + "").parentNode.outerHTML="";
+  var currentUser = this.auth.currentUser.uid;
+  this.groceryRef = this.database.ref(currentUser + "/grocery-list");
+  this.groceryRef.child(key).remove();
+};
+
+MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, num) {
+  var container = document.createElement('tr');
+  container.innerHTML = MealPrepSunday.GROCERY_LIST_TEMPLATE;
+  container.setAttribute('id', key);
+  var td = container.firstChild;
+  td.setAttribute('id', "item_name" + num);
+  td.textContent = item;
+  var td2 = container.firstChild.nextSibling;
+  td2.setAttribute('id', "item_amount" + num);
+  td2.textContent = amount;
+  var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
+  td3.setAttribute('id', "item_edit" + num);
+  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+  td3.setAttribute('id', "item_save" + num);
+  var td4 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
+  td4.setAttribute('id', "item_remove" + num);
+  this.groceryList.appendChild(container);
+};
+
 MealPrepSunday.prototype.toggleButton = function() {
-  if (this.ingredientInput.value || this.recipeInput.value) {
+  if (this.ingredientInput.value || this.recipeInput.value || this.itemInput.value) {
     this.addIngredient.removeAttribute('disabled');
     this.addRecipe.removeAttribute('disabled');
+    this.addGroceryItem.removeAttribute('disabled');
   } else {
     this.addIngredient.setAttribute('disabled', 'true');
     this.addRecipe.setAttribute('disabled', 'true');
+    this.addGroceryItem.setAttribute('disabled', 'true');
   }
 };
 
@@ -301,6 +435,19 @@ MealPrepSunday.RECIPE_TEMPLATE =
       '<h2 class="mdl-card__title-text"></h2>' +
     '</div>' +
     '<div class="recipe-data mdl-card__supporting-text"></div>';
+
+MealPrepSunday.GROCERY_LIST_TEMPLATE =
+    '<tr>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--numeric"></td>' +
+      '<td class="mdl-data-table__cell">' +
+        '<button class="grocery-edit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">edit</i></button>' +
+        '<button class="grocery-submit mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+      '</td>' +
+      '<td class="mdl-data-table__cell">' +
+        '<button class="grocery-remove mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">remove</i></button>' +
+      '</td>' +
+    '</tr>';
 
 /**
 '<td class="ingred mdl-data-table__cell--non-nurmeric">' +
