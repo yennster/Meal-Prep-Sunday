@@ -62,6 +62,11 @@
 
         <!-- Home -->
         <section class="mdl-layout__tab-panel is-active" id="Home">
+          <div class="mdl-grid" id="public-recipe-list">
+            <div class="mdl-cell mdl-cell--12-col">
+              <p class="mdl-typography--display-1-color-contrast">Public Recipe Feed</p>
+            </div>
+          </div>
         </section>
 
         <!-- Recipes -->
@@ -97,6 +102,10 @@
                       </div>
                       <!--<button class="add-recipe-ingredient mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">add</i></button>-->
                     </div>
+                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="recipe-public">
+                      <input type="checkbox" id="recipe-public" class="mdl-checkbox__input">
+                      <span class="mdl-checkbox__label">Make recipe public?</span>
+                    </label>
                   </form>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
@@ -252,7 +261,7 @@
       <!-- Footer -->
       <footer class="mdl-mini-footer" style="flex: 0 0 auto;">
         <div class="mdl-mini-footer__left-section">
-          <div class="mdl-logo">Meal Prep Sunday</div>
+          <!--<div class="mdl-logo">Meal Prep Sunday</div>-->
           <ul class="mdl-mini-footer__link-list">
             <li><a href="#Help">Help</a></li>
             <li><a href="#About">About</a></li>

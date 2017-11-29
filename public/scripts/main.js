@@ -28,6 +28,7 @@ function MealPrepSunday() {
   this.recipeIngredient = document.getElementById('recipe_ingredient');
   this.recipeIngredientAmt = document.getElementById('recipe_ingredient_amount');
   this.addRecipe = document.getElementById('add-recipe');
+  this.recipePublic = document.getElementById('recipe-public');
 
   var buttonTogglingHandler = this.toggleButton.bind(this);
   this.ingredientInput.addEventListener('keyup', buttonTogglingHandler);
@@ -104,6 +105,8 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
     $(document).on('click', '.grocery-edit', this.editItem.bind(this));
     $(document).on('click', '.grocery-remove', this.removeItem.bind(this));
+
+    $(document).on('click', '.recipe-remove', this.removeRecipe.bind(this));
 
     $('#print-grocery-list').on('click',function(){
       var groceryTable = document.getElementById("grocery-table");
@@ -266,16 +269,29 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       recipe: this.recipeInput.value,
       ingredient: this.recipeIngredient.value,
       amount: this.recipeIngredientAmt.value,
+      public: $(this.recipePublic).is(":checked")
     }).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       MealPrepSunday.resetMaterialTextfield(this.recipeIngredient);
       MealPrepSunday.resetMaterialTextfield(this.recipeIngredientAmt);
+      $(this.recipePublic).parent().removeClass('is-checked');
       this.toggleButton();
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
     });
   }
+};
+
+MealPrepSunday.prototype.removeRecipe = function(e) {
+  var target = e.target.parentNode;
+  console.log(target);
+  var num = target.id.substring(13);
+  var key = target.parentNode.parentNode.id;
+  document.getElementById("recipe_name" + num + "").parentNode.parentNode.outerHTML="";
+  var currentUser = this.auth.currentUser.uid;
+  this.recipeRef = this.database.ref(currentUser + "/recipes");
+  this.recipeRef.child(key).remove();
 };
 
 MealPrepSunday.prototype.loadRecipes = function() {
@@ -285,13 +301,13 @@ MealPrepSunday.prototype.loadRecipes = function() {
   var numRecipes = 0;
   var setRecipe = function(data) {
     var val = data.val();
-    this.displayRecipes(data.key, val.name, val.recipe, val.ingredient, val.amount, numRecipes);
+    this.displayRecipes(data.key, val.name, val.recipe, val.ingredient, val.amount, val.public, numRecipes);
     numRecipes++;
   }.bind(this);
   this.recipeRef.on('child_added', setRecipe);
 };
 
-MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient, amount, num) {
+MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient, amount, pub, num) {
   var container = document.createElement('div');
   container.innerHTML = MealPrepSunday.RECIPE_TEMPLATE;
   container.setAttribute('id', key);
@@ -301,7 +317,14 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   title.textContent = name;
   var rcp = container.firstChild.nextSibling;
   rcp.setAttribute('id', "recipe_data" + num);
-  rcp.innerHTML = "<pre>" + recipe + "</pre>" + "<p></p>Ingredient: " + ingredient + ", Amount: " + amount;
+  rcp.innerHTML = "<pre>" + recipe + "</pre>" + "<p></p>Ingredient: " + ingredient + ", Amount: " + amount
+                  + "<p></p>Public: " + pub;
+  var btns = container.firstChild.nextSibling.nextSibling.firstChild;
+  btns.setAttribute('id', "recipe_edit" + num);
+  btns = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+  btns.setAttribute('id', "recipe_save" + num);
+  btns = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+  btns.setAttribute('id', "recipe_remove" + num);
   this.recipeList.appendChild(container);
 };
 
