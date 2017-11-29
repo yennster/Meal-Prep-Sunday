@@ -9,27 +9,32 @@ function MealPrepSunday() {
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
 
+  // ====================== Inventory ======================
   this.inventoryForm = document.getElementById('inventory-form');
   this.inventoryList = document.getElementById('inventory-list');
   this.ingredientInput = document.getElementById('ingredient');
   this.ingredientAmount = document.getElementById('ingredient_amount');
   this.addIngredient = document.getElementById('add-ingredient');
 
+  // ====================== Grocery List ======================
   this.groceryForm = document.getElementById('grocery-form');
   this.groceryList = document.getElementById('grocery-list');
   this.itemInput = document.getElementById('item');
   this.itemAmount = document.getElementById('item_amount');
   this.addGroceryItem = document.getElementById('add-grocery-item');
 
+  // ====================== Recipes ======================
   this.recipeForm = document.getElementById('recipe-form');
   this.recipeList = document.getElementById('recipe-list');
   this.recipeName = document.getElementById('recipe_name');
   this.recipeInput = document.getElementById('recipe');
   this.recipeIngredient = document.getElementById('recipe_ingredient');
   this.recipeIngredientAmt = document.getElementById('recipe_ingredient_amount');
+  this.recipeIngredientUnits = document.getElementById('recipe_ingredient_units');
   this.addRecipe = document.getElementById('add-recipe');
   this.recipePublic = document.getElementById('recipe-public');
 
+  // ====================== Button/Input Handlers ======================
   var buttonTogglingHandler = this.toggleButton.bind(this);
   this.ingredientInput.addEventListener('keyup', buttonTogglingHandler);
   this.ingredientInput.addEventListener('change', buttonTogglingHandler);
@@ -40,10 +45,12 @@ function MealPrepSunday() {
   this.itemInput.addEventListener('keyup', buttonTogglingHandler);
   this.itemInput.addEventListener('change', buttonTogglingHandler);
 
+  // ====================== Save Button Handlers ======================
   this.inventoryForm.addEventListener('submit', this.saveIngredient.bind(this));
   this.recipeForm.addEventListener('submit', this.saveRecipe.bind(this));
   this.groceryForm.addEventListener('submit', this.saveItem.bind(this));
 
+  // ====================== Sign-out/Sign-in Handlers ======================
   this.signOutButton.addEventListener('click', this.signOut.bind(this));
   this.signInButton.addEventListener('click', this.signIn.bind(this));
 
@@ -96,18 +103,22 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     this.userPic.removeAttribute('hidden');
     this.signOutButton.removeAttribute('hidden');
 
+    // ====================== Load User Data ======================
     this.loadInventory();
     this.loadRecipes();
     this.loadGroceryList();
 
+    // ====================== Edit/Remove Handlers ======================
     $(document).on('click', '.inventory-edit', this.editIngredient.bind(this));
     $(document).on('click', '.inventory-remove', this.removeIngredient.bind(this));
 
     $(document).on('click', '.grocery-edit', this.editItem.bind(this));
     $(document).on('click', '.grocery-remove', this.removeItem.bind(this));
 
+    //$(document).on('click', '.recipe-edit', this.editRecipe.bind(this));
     $(document).on('click', '.recipe-remove', this.removeRecipe.bind(this));
 
+    // Print grocery list function (on button click)
     $('#print-grocery-list').on('click',function(){
       var groceryTable = document.getElementById("grocery-table");
       var newWin = window.open("");
@@ -134,7 +145,6 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     this.userName.setAttribute('hidden', 'true');
     this.userPic.setAttribute('hidden', 'true');
     this.signOutButton.setAttribute('hidden', 'true');
-
     // Show sign-in button.
     this.signInButton.removeAttribute('hidden');
   }
@@ -142,12 +152,9 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
 // Returns true if user is signed-in. Otherwise false and displays a message.
 MealPrepSunday.prototype.checkSignedInWithMessage = function() {
-  // Return true if the user is signed in Firebase
   if (this.auth.currentUser) {
     return true;
   }
-
-  // Display a message to the user using a Toast.
   var data = {
     message: 'You must sign-in first',
     timeout: 2000
@@ -156,11 +163,12 @@ MealPrepSunday.prototype.checkSignedInWithMessage = function() {
   return false;
 };
 
-// Saves a new message on the Firebase DB.
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Inventory ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 MealPrepSunday.prototype.saveIngredient = function(e) {
   e.preventDefault();
 
-  // Check that the user entered a message and is signed in.
   if (this.ingredientInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
     this.inventoryRef = this.database.ref(currentUser + "/inventory");
@@ -168,7 +176,6 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
       ingredient: this.ingredientInput.value,
       amount: this.ingredientAmount.value,
     }).then(function() {
-      // Clear message text field and SEND button state.
       MealPrepSunday.resetMaterialTextfield(this.ingredientInput);
       MealPrepSunday.resetMaterialTextfield(this.ingredientAmount);
       this.toggleButton();
@@ -205,8 +212,10 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   var amount = document.getElementById("amount" + num);
   var name = ingredient.textContent;
   var current_amt = amount.textContent;
-  ingredient.innerHTML = "<input class='mdl-textfield__input' type='text' value='" + name + "' id='new_name" + num + "'>"
-  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='" + current_amt + "' id='new_amount" + num + "'>"
+  ingredient.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
+                          + name + "' id='new_name" + num + "'>";
+  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
+                          + current_amt + "' id='new_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
   var inventoryRef = this.database.ref(currentUser + "/inventory");
   $("#save" + num).on("click", function(e) {
@@ -258,6 +267,20 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   this.inventoryList.appendChild(container);
 };
 
+MealPrepSunday.INGREDIENT_TEMPLATE =
+    '<tr>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--numeric"></td>' +
+      '<td class="mdl-data-table__cell">' +
+        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
+      '</td>' +
+    '</tr>';
+
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Recipes ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 MealPrepSunday.prototype.saveRecipe = function(e) {
   e.preventDefault();
 
@@ -269,12 +292,15 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       recipe: this.recipeInput.value,
       ingredient: this.recipeIngredient.value,
       amount: this.recipeIngredientAmt.value,
-      public: $(this.recipePublic).is(":checked")
+      units: this.recipeIngredientUnits.value,
+      public: $(this.recipePublic).is(":checked"),
+      likes: 0
     }).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       MealPrepSunday.resetMaterialTextfield(this.recipeIngredient);
       MealPrepSunday.resetMaterialTextfield(this.recipeIngredientAmt);
+      MealPrepSunday.resetMaterialTextfield(this.recipeIngredientUnits);
       $(this.recipePublic).parent().removeClass('is-checked');
       this.toggleButton();
     }.bind(this)).catch(function(error) {
@@ -285,7 +311,6 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
 
 MealPrepSunday.prototype.removeRecipe = function(e) {
   var target = e.target.parentNode;
-  console.log(target);
   var num = target.id.substring(13);
   var key = target.parentNode.parentNode.id;
   document.getElementById("recipe_name" + num + "").parentNode.parentNode.outerHTML="";
@@ -301,13 +326,13 @@ MealPrepSunday.prototype.loadRecipes = function() {
   var numRecipes = 0;
   var setRecipe = function(data) {
     var val = data.val();
-    this.displayRecipes(data.key, val.name, val.recipe, val.ingredient, val.amount, val.public, numRecipes);
+    this.displayRecipes(data.key, val.name, val.recipe, val.ingredient, val.amount, val.units, val.public, numRecipes);
     numRecipes++;
   }.bind(this);
   this.recipeRef.on('child_added', setRecipe);
 };
 
-MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient, amount, pub, num) {
+MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredients, amounts, units, pub, num) {
   var container = document.createElement('div');
   container.innerHTML = MealPrepSunday.RECIPE_TEMPLATE;
   container.setAttribute('id', key);
@@ -316,18 +341,69 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   title.setAttribute('id', "recipe_name" + num);
   title.textContent = name;
   var rcp = container.firstChild.nextSibling;
+  console.log(rcp);
   rcp.setAttribute('id', "recipe_data" + num);
-  rcp.innerHTML = "<pre>" + recipe + "</pre>" + "<p></p>Ingredient: " + ingredient + ", Amount: " + amount
-                  + "<p></p>Public: " + pub;
-  var btns = container.firstChild.nextSibling.nextSibling.firstChild;
+  rcp.innerHTML += "<pre>" + recipe + "</pre>"; //"<p></p>Ingredient: "+ ingredient + ", Amount: " + amount + "<p></p>Public: " + pub;
+  var ingrd = container.firstChild.nextSibling.nextSibling;
+  console.log(ingrd);
+  ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
+  ingrd.firstChild.setAttribute('id', "recipe_ingrds" + num);
+  console.log(ingredients);
+  for (var i = 0; i < 1; i++) {
+    var row = document.createElement('tr');
+    row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
+    row.setAttribute('id', "recipe" + num + "_ingrd" + i);
+    row.firstChild.textContent = ingredients;
+    row.firstChild.nextSibling.textContent = amounts;
+    row.firstChild.nextSibling.nextSibling.textContent = units;
+    console.log(row);
+    ingrd.firstChild.firstChild.nextSibling.appendChild(row);
+  }
+  var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
+
   btns.setAttribute('id', "recipe_edit" + num);
-  btns = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+  btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
   btns.setAttribute('id', "recipe_save" + num);
-  btns = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+  btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
   btns.setAttribute('id', "recipe_remove" + num);
   this.recipeList.appendChild(container);
 };
 
+MealPrepSunday.RECIPE_TEMPLATE =
+    '<div class="mdl-card__title mdl-color--accent mdl-color-text--white">' +
+      '<h2 class="mdl-card__title-text"></h2>' +
+    '</div>' +
+    '<div class="recipe-data mdl-card__supporting-text mdl-card--expand">' +
+    '</div>' +
+    '<div class="recipe-ingrd-data mdl-card__supporting-text" style="padding:0;width:100%;">' +
+    '</div>' +
+    '<div class="mdl-card__actions mdl-card--border">' +
+      '<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+      '<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+      '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
+    '</div>';
+
+MealPrepSunday.RECIPE_INGRDS_TEMPLATE =
+    '<table class="mdl-data-table mdl-js-data-table" style="width:100%;border:none;">' +
+      '<thead><tr>' +
+          '<th class="mdl-data-table__cell--non-numeric">Ingredient</th>' +
+          '<th class="mdl-data-table__cell--numeric">Amount</th>' +
+          '<th class="mdl-data-table__cell--non-numeric">Units</th>' +
+        '</tr></thead>' +
+      '<tbody>' +
+      '</tbody>' +
+    '</table>';
+
+MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE =
+    '<tr>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--numeric"></td>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+    '</tr>';
+
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Grocery List ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 MealPrepSunday.prototype.saveItem = function(e) {
   e.preventDefault();
 
@@ -373,8 +449,10 @@ MealPrepSunday.prototype.editItem = function(e) {
   var amount = document.getElementById("item_amount" + num);
   var name = item.textContent;
   var current_amt = amount.textContent;
-  item.innerHTML = "<input class='mdl-textfield__input' type='text' value='" + name + "' id='new_item_name" + num + "'>"
-  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='" + current_amt + "' id='new_item_amount" + num + "'>"
+  item.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
+                    + name + "' id='new_item_name" + num + "'>";
+  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
+                    + current_amt + "' id='new_item_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
   var groceryRef = this.database.ref(currentUser + "/grocery-list");
   $("#item_save" + num).on('click', function(e) {
@@ -426,6 +504,31 @@ MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, num) {
   this.groceryList.appendChild(container);
 };
 
+MealPrepSunday.GROCERY_LIST_TEMPLATE =
+    '<tr>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--numeric"></td>' +
+      '<td class="mdl-data-table__cell">' +
+        '<button class="grocery-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+        '<button class="grocery-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+        '<button class="grocery-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
+      '</td>' +
+    '</tr>';
+
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Feed ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+ /**
+ var todosRef = new Firebase("https://yourdb.firebaseio.com/todos/" + uid);
+ var privateTodosRef = todosRef.orderByChild("private").equalTo(true);
+ var privateTodos;
+ **/
+
+
+ /*
+  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Helper Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  */
 MealPrepSunday.prototype.toggleButton = function() {
   if (this.ingredientInput.value || this.recipeInput.value || this.itemInput.value) {
     this.addIngredient.removeAttribute('disabled');
@@ -443,46 +546,6 @@ MealPrepSunday.resetMaterialTextfield = function(element) {
   element.value = '';
   element.parentNode.MaterialTextfield.boundUpdateClassesHandler();
 };
-
-MealPrepSunday.INGREDIENT_TEMPLATE =
-    '<tr>' +
-      '<td class="mdl-data-table__cell--non-numeric"></td>' +
-      '<td class="mdl-data-table__cell--numeric"></td>' +
-      '<td class="mdl-data-table__cell">' +
-        '<button class="inventory-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
-        '<button class="inventory-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
-        '<button class="inventory-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
-      '</td>' +
-    '</tr>';
-
-MealPrepSunday.RECIPE_TEMPLATE =
-    '<div class="mdl-card__title mdl-color--accent mdl-color-text--white">' +
-      '<h2 class="mdl-card__title-text"></h2>' +
-    '</div>' +
-    '<div class="recipe-data mdl-card__supporting-text mdl-card--expand"></div>' +
-    '<div class="mdl-card__actions mdl-card--border">' +
-      '<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
-      '<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
-      '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
-    '</div>';
-
-MealPrepSunday.GROCERY_LIST_TEMPLATE =
-    '<tr>' +
-      '<td class="mdl-data-table__cell--non-numeric"></td>' +
-      '<td class="mdl-data-table__cell--numeric"></td>' +
-      '<td class="mdl-data-table__cell">' +
-        '<button class="grocery-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
-        '<button class="grocery-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
-        '<button class="grocery-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
-      '</td>' +
-    '</tr>';
-
-/**
-'<td class="ingred mdl-data-table__cell--non-nurmeric">' +
-  '<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">' +
-  '<i class="material-icons">remove</i></button>' +
-'</td>' +
-**/
 
 window.onload = function() {
   window.mealPrepSunday = new MealPrepSunday();
