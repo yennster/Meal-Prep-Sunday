@@ -219,7 +219,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   var current_amt = amount.textContent;
   ingredient.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
                           + name + "' id='new_name" + num + "'>";
-  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
+  amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                           + current_amt + "' id='new_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
   var inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
@@ -467,7 +467,7 @@ MealPrepSunday.prototype.editItem = function(e) {
   var current_amt = amount.textContent;
   item.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
                     + name + "' id='new_item_name" + num + "'>";
-  amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
+  amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                     + current_amt + "' id='new_item_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
   var groceryRef = this.database.ref("/users/" + currentUser + "/grocery-list");
