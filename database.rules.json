@@ -1,6 +1,17 @@
 {
   "rules": {
     ".read": "auth != null",
-    ".write": "auth != null"
+    ".write": "auth != null",
+    "users": {
+      "$uid": {
+        "recipes": {
+          ".read": "true"
+        }
+      }
+    },
+    "public-recipes": {
+      ".read": "true",
+      ".write": "auth != null"
+    }
   }
 }

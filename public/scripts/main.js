@@ -9,6 +9,9 @@ function MealPrepSunday() {
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
 
+  // ====================== Public Recipe Feed ======================
+  this.publicRecipeList = document.getElementById('public-recipe-list');
+
   // ====================== Inventory ======================
   this.inventoryForm = document.getElementById('inventory-form');
   this.inventoryList = document.getElementById('inventory-list');
@@ -107,6 +110,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     this.loadInventory();
     this.loadRecipes();
     this.loadGroceryList();
+    this.loadPublicRecipes();
 
     // ====================== Edit/Remove Handlers ======================
     $(document).on('click', '.inventory-edit', this.editIngredient.bind(this));
@@ -141,6 +145,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     // Hide sign-in button.
     this.signInButton.setAttribute('hidden', 'true');
   } else { // User is signed out!
+    this.loadPublicRecipes();
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
     this.userPic.setAttribute('hidden', 'true');
@@ -171,7 +176,7 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
 
   if (this.ingredientInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
-    this.inventoryRef = this.database.ref(currentUser + "/inventory");
+    this.inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
     this.inventoryRef.push({
       ingredient: this.ingredientInput.value,
       amount: this.ingredientAmount.value,
@@ -187,7 +192,7 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
 
 MealPrepSunday.prototype.loadInventory = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.inventoryRef = this.database.ref(currentUser + "/inventory");
+  this.inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
   this.inventoryRef.off();
   var numIngredients = 0;
   var setIngredient = function(data) {
@@ -217,7 +222,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
                           + current_amt + "' id='new_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
-  var inventoryRef = this.database.ref(currentUser + "/inventory");
+  var inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
   $("#save" + num).on("click", function(e) {
     e.preventDefault();
     var new_ingred = document.getElementById("new_name" + num).value;
@@ -244,7 +249,7 @@ MealPrepSunday.prototype.removeIngredient = function(e) {
   var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
-  this.inventoryRef = this.database.ref(currentUser + "/inventory");
+  this.inventoryRef = this.database.ref("users/" + currentUser + "/inventory");
   this.inventoryRef.child(key).remove();
 };
 
@@ -286,8 +291,9 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
 
   if (this.recipeInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
-    this.recipeRef = this.database.ref(currentUser + "/recipes");
-    this.recipeRef.push({
+    this.recipeRef = this.database.ref("users/" + currentUser + "/recipes");
+    var recipeKey = this.recipeRef.push().key;
+    var recipeData = {
       name: this.recipeName.value,
       recipe: this.recipeInput.value,
       ingredient: this.recipeIngredient.value,
@@ -295,7 +301,17 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       units: this.recipeIngredientUnits.value,
       public: $(this.recipePublic).is(":checked"),
       likes: 0
-    }).then(function() {
+    }
+    var updates = {};
+    if ($(this.recipePublic).is(":checked")) {
+      var publicData = {
+        recipe: recipeKey,
+        user: currentUser
+      }
+      updates['/public-recipes/' + recipeKey] = publicData;
+    }
+    updates[currentUser + "/recipes/" + recipeKey] = recipeData;
+    this.database.ref().update(updates).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       MealPrepSunday.resetMaterialTextfield(this.recipeIngredient);
@@ -315,13 +331,13 @@ MealPrepSunday.prototype.removeRecipe = function(e) {
   var key = target.parentNode.parentNode.id;
   document.getElementById("recipe_name" + num + "").parentNode.parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
-  this.recipeRef = this.database.ref(currentUser + "/recipes");
+  this.recipeRef = this.database.ref("users/" + currentUser + "/recipes");
   this.recipeRef.child(key).remove();
 };
 
 MealPrepSunday.prototype.loadRecipes = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.recipeRef = this.database.ref(currentUser + "/recipes");
+  this.recipeRef = this.database.ref("users/" + currentUser + "/recipes");
   this.recipeRef.off();
   var numRecipes = 0;
   var setRecipe = function(data) {
@@ -341,14 +357,11 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   title.setAttribute('id', "recipe_name" + num);
   title.textContent = name;
   var rcp = container.firstChild.nextSibling;
-  console.log(rcp);
   rcp.setAttribute('id', "recipe_data" + num);
-  rcp.innerHTML += "<pre>" + recipe + "</pre>"; //"<p></p>Ingredient: "+ ingredient + ", Amount: " + amount + "<p></p>Public: " + pub;
+  rcp.innerHTML += "<pre>" + recipe + "</pre>";
   var ingrd = container.firstChild.nextSibling.nextSibling;
-  console.log(ingrd);
   ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
   ingrd.firstChild.setAttribute('id', "recipe_ingrds" + num);
-  console.log(ingredients);
   for (var i = 0; i < 1; i++) {
     var row = document.createElement('tr');
     row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
@@ -356,7 +369,6 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
     row.firstChild.textContent = ingredients;
     row.firstChild.nextSibling.textContent = amounts;
     row.firstChild.nextSibling.nextSibling.textContent = units;
-    console.log(row);
     ingrd.firstChild.firstChild.nextSibling.appendChild(row);
   }
   var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
@@ -409,7 +421,7 @@ MealPrepSunday.prototype.saveItem = function(e) {
 
   if (this.itemInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
-    this.groceryRef = this.database.ref(currentUser + "/grocery-list");
+    this.groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
     this.groceryRef.push({
       item: this.itemInput.value,
       amount: this.itemAmount.value,
@@ -425,7 +437,7 @@ MealPrepSunday.prototype.saveItem = function(e) {
 
 MealPrepSunday.prototype.loadGroceryList = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.groceryRef = this.database.ref(currentUser + "/grocery-list");
+  this.groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
   this.groceryRef.off();
   var numItems = 0;
   var setItem = function(data) {
@@ -454,7 +466,7 @@ MealPrepSunday.prototype.editItem = function(e) {
   amount.innerHTML = "<input class='mdl-textfield__input' type='number' value='"
                     + current_amt + "' id='new_item_amount" + num + "'>";
   var currentUser = this.auth.currentUser.uid;
-  var groceryRef = this.database.ref(currentUser + "/grocery-list");
+  var groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
   $("#item_save" + num).on('click', function(e) {
     e.preventDefault();
     var new_item = document.getElementById("new_item_name" + num).value;
@@ -481,7 +493,7 @@ MealPrepSunday.prototype.removeItem = function(e) {
   var key = target.parentNode.parentNode.id;
   document.getElementById("item_name" + num + "").parentNode.outerHTML="";
   var currentUser = this.auth.currentUser.uid;
-  this.groceryRef = this.database.ref(currentUser + "/grocery-list");
+  this.groceryRef = this.database.ref("users/" + currentUser + "/grocery-list");
   this.groceryRef.child(key).remove();
 };
 
@@ -518,13 +530,62 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
 /*
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Feed ~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+ MealPrepSunday.prototype.loadPublicRecipes = function() {
+   this.publicRef = this.database.ref("/public-recipes");
+   this.publicRef.off();
+   var numRecipes = 0;
+   var setPublicRecipe = function(data) {
+     var val = data.val();
+     var recipeKey = val.recipe;
+     var userID = val.user;
+     var mps = this;
+     this.database.ref("users/" + userID + "/recipes/" + recipeKey).once('value').then(function(snapshot) {
+        var rcp = snapshot.val();
+        mps.displayPublicRecipes(rcp.key, rcp.name, rcp.recipe, rcp.ingredient, rcp.amount, rcp.units, numRecipes);
+        //return snapshot.val();
+      });
+      numRecipes++;
+   }.bind(this);
+   this.publicRef.on('child_added', setPublicRecipe);
+ };
 
- /**
- var todosRef = new Firebase("https://yourdb.firebaseio.com/todos/" + uid);
- var privateTodosRef = todosRef.orderByChild("private").equalTo(true);
- var privateTodos;
- **/
+ MealPrepSunday.prototype.displayPublicRecipes = function(key, name, recipe, ingredients, amounts, units, num) {
+   var container = document.createElement('div');
+   container.innerHTML = MealPrepSunday.PUBLIC_RECIPE_TEMPLATE;
+   container.setAttribute('id', key);
+   container.className += "mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+   var title = container.firstChild.firstChild;
+   title.setAttribute('id', "public_recipe_name" + num);
+   title.textContent = name;
+   var rcp = container.firstChild.nextSibling;
+   rcp.setAttribute('id', "public_recipe_data" + num);
+   rcp.innerHTML += "<pre>" + recipe + "</pre>";
+   var ingrd = container.firstChild.nextSibling.nextSibling;
+   ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
+   ingrd.firstChild.setAttribute('id', "public_recipe_ingrds" + num);
+   for (var i = 0; i < 1; i++) {
+     var row = document.createElement('tr');
+     row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
+     row.setAttribute('id', "public_recipe" + num + "_ingrd" + i);
+     row.firstChild.textContent = ingredients;
+     row.firstChild.nextSibling.textContent = amounts;
+     row.firstChild.nextSibling.nextSibling.textContent = units;
+     ingrd.firstChild.firstChild.nextSibling.appendChild(row);
+   }
+   this.publicRecipeList.appendChild(container);
+ };
 
+ MealPrepSunday.PUBLIC_RECIPE_TEMPLATE =
+     '<div class="mdl-card__title mdl-color--accent mdl-color-text--white">' +
+       '<h2 class="mdl-card__title-text"></h2>' +
+     '</div>' +
+     '<div class="recipe-data mdl-card__supporting-text mdl-card--expand">' +
+     '</div>' +
+     '<div class="recipe-ingrd-data mdl-card__supporting-text" style="padding:0;width:100%;">' +
+     '</div>' +
+     '<div class="mdl-card__actions mdl-card--border">' +
+       'Placeholder for likes' +
+     '</div>';
 
  /*
   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Helper Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~
