@@ -106,7 +106,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 };
 
 // Returns true if user is signed-in. Otherwise false and displays a message.
-MealPrepSunday.prototype.checkSignedIn = function() {
+MealPrepSunday.prototype.checkSignedInWithMessage = function() {
   // Return true if the user is signed in Firebase
   if (this.auth.currentUser) {
     return true;
@@ -126,7 +126,7 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
   e.preventDefault();
 
   // Check that the user entered a message and is signed in.
-  if (this.ingredientInput.value) {
+  if (this.ingredientInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
     this.inventoryRef = this.database.ref(currentUser + "/inventory");
     this.inventoryRef.push({
@@ -176,8 +176,6 @@ MealPrepSunday.prototype.editIngredient = function(e) {
     e.preventDefault();
     var new_ingred = document.getElementById("new_name" + num).value;
     var new_amt = document.getElementById("new_amount" + num).value;
-    console.log(new_ingred);
-    console.log(new_amt);
     inventoryRef.child(key).set({
       ingredient: new_ingred,
       amount: new_amt,
@@ -194,7 +192,6 @@ MealPrepSunday.prototype.editIngredient = function(e) {
 
 MealPrepSunday.prototype.removeIngredient = function(e) {
   var target = e.target.parentNode;
-  console.log(target)
   var num = target.id;
   var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
@@ -208,11 +205,9 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   container.innerHTML = MealPrepSunday.INGREDIENT_TEMPLATE;
   container.setAttribute('id', key);
   var td = container.firstChild;
-  //td.setAttribute('id', key);
   td.setAttribute('id', "name" + num);
   td.textContent = ingredient;
   var td2 = container.firstChild.nextSibling;
-  //td2.setAttribute('id', key);
   td2.setAttribute('id', "amount" + num);
   td2.textContent = amount;
   var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
@@ -225,7 +220,7 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
 MealPrepSunday.prototype.saveRecipe = function(e) {
   e.preventDefault();
 
-  if (this.recipeInput.value) {
+  if (this.recipeInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
     this.recipeRef = this.database.ref(currentUser + "/recipes");
     this.recipeRef.push({
@@ -234,7 +229,6 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       ingredient: this.recipeIngredient.value,
       amount: this.recipeIngredientAmt.value,
     }).then(function() {
-      // Clear message text field and SEND button state.
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       MealPrepSunday.resetMaterialTextfield(this.recipeIngredient);
@@ -265,12 +259,10 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   container.setAttribute('id', key);
   container.className += "mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
   var title = container.firstChild.firstChild;
-  title.setAttribute('id', "name" + num);
+  title.setAttribute('id', "recipe_name" + num);
   title.textContent = name;
   var rcp = container.firstChild.nextSibling;
-  console.log(title);
-  console.log(rcp);
-  rcp.setAttribute('id', "recipe" + num);
+  rcp.setAttribute('id', "recipe_data" + num);
   rcp.innerHTML = "<pre>" + recipe + "</pre>" + "<p></p>Ingredient: " + ingredient + ", Amount: " + amount;
   this.recipeList.appendChild(container);
 };

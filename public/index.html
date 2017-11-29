@@ -66,10 +66,15 @@
 
         <!-- Recipes -->
         <section class="mdl-layout__tab-panel" id="Recipes">
-          <div class="mdl-grid">
-            <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+          <div class="mdl-grid" id="recipe-list">
+            <div class="mdl-cell mdl-cell--12-col">
+              <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--grey-400" onclick="$('#add-recipe-div').toggle();">
+                Create new recipe
+              </button>
+            </div>
+            <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp" id="add-recipe-div" style="display:none;">
                 <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
-                  <h2 class="mdl-card__title-text">Create a new recipe</h2>
+                  <h2 class="mdl-card__title-text">Create new recipe</h2>
                 </div>
                 <div class="mdl-card__supporting-text">
                   <form id="recipe-form" action="#">
@@ -99,8 +104,7 @@
                 </div>
             </div>
           </div>
-          <div class="mdl-grid" id="recipe-list">
-          </div>
+
         </section>
 
         <!-- Grocery-List -->
@@ -110,7 +114,12 @@
         <!-- Inventory/Ingredients -->
         <section class="mdl-layout__tab-panel" id="Inventory">
             <div class="mdl-grid">
-              <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp">
+              <div class="mdl-cell mdl-cell--12-col">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--grey-400" onclick="$('#add-ingredient-div').toggle();">
+                  Add ingredient
+                </button>
+              </div>
+              <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp" id="add-ingredient-div" style="display:none;">
                   <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                     <h2 class="mdl-card__title-text">Add ingredient</h2>
                   </div>
@@ -130,6 +139,7 @@
                     <button id="add-ingredient" form="inventory-form" disabled type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Add</button>
                   </div>
               </div>
+
               <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
                   <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                     <h2 class="mdl-card__title-text">Inventory</h2>
@@ -153,7 +163,6 @@
         </section>
 
         <!-- About -->
-        <!--
         <section class="mdl-layout__tab-panel" id="About">
             <div class="mdl-grid">
               <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
@@ -185,7 +194,6 @@
               </div>
             </div>
         </section>
-      -->
 
         <div id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
           <div class="mdl-snackbar__text"></div>
