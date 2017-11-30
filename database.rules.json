@@ -10,6 +10,7 @@
       }
     },
     "public-recipes": {
+      ".indexOn": ["time"],
       ".read": "true",
       ".write": "auth != null"
     }

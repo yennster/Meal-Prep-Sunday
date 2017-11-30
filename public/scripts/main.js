@@ -303,10 +303,13 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       likes: 0
     }
     var updates = {};
+
     if ($(this.recipePublic).is(":checked")) {
+      var time = 0 - (Date.now());
       var publicData = {
         recipe: recipeKey,
-        user: currentUser
+        user: currentUser,
+        time: time
       }
       updates['/public-recipes/' + recipeKey] = publicData;
     }
@@ -535,7 +538,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Feed ~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
  MealPrepSunday.prototype.loadPublicRecipes = function() {
-   this.publicRef = this.database.ref("/public-recipes");
+   this.publicRef = this.database.ref("/public-recipes").orderByChild("time");//.limitToLast(20);
    this.publicRef.off();
    var numRecipes = 0;
    var setPublicRecipe = function(data) {
