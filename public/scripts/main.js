@@ -409,7 +409,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
       return response.json();
     }).then(function(data) {
       var ingredients = data.ingredientLines;
-      //console.log(ingredients);
+      console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
       var recipeRef = database.ref("/users/" + currentUser + "/recipes");
@@ -418,24 +418,24 @@ MealPrepSunday.prototype.saveImport = function(e) {
         var amount = ingredients[i].substr(0, ingredients[i].indexOf(' '));
         var units1 = ingredients[i].substr(ingredients[i].indexOf(' ') + 1);
         var units = ingredients[i].substr(amount.length + 1, units1.indexOf(' '));
+        var name = ingredients[i].substr(units.length + amount.length + 1);
         if (units.includes("heaping")) {
           units = ingredients[i].substr(units.length + amount.length + 2);
         }
-        var name = ingredients[i].substr(units.length + amount.length + 1);
-        if (amount.includes("-")) {
+        console.log(name);
+        console.log(amount);
+        console.log(units);
+        if (units.match(/\d+/g)) {
+          units = amount + " " + units;
+          var index = units.indexOf("/");
+          amount = eval(units.substring(0, index + 2))
+          units = units.substring(index + 2);
+        }
+        amount = amount.toString();
+        console.log(amount);
+        if (amount.indexOf("-") != -1) {
           amount = amount.substr(amount.indexOf('-') + 1);
         }
-        if (units.includes('cup') || units.includes('Cup')) {
-          units = "cups";
-        } else if (units.includes('teaspoon') || units.includes('Teaspoon')) {
-          units = "tsp";
-        } else if (units.includes('tablespoon') || units.includes('Tablespoon')) {
-          units = "tbsp";
-        } else {
-          name = units + " " + name;
-          units = "units";
-        }
-        //console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         if (amount.includes("¾")) {
           var fracIndex = amount.indexOf("¾");
           var total = amount.substring(0, fracIndex);
@@ -458,6 +458,17 @@ MealPrepSunday.prototype.saveImport = function(e) {
         } else {
           amount = eval(amount);
         }
+        if (units.includes('cup') || units.includes('Cup')) {
+          units = "cups";
+        } else if (units.includes('teaspoon') || units.includes('Teaspoon') || units.includes('tsp')) {
+          units = "tsp";
+        } else if (units.includes('tablespoon') || units.includes('Tablespoon') || units.includes('tbsp')) {
+          units = "tbsp";
+        } else {
+          name = units + " " + name;
+          units = "units";
+        }
+        console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         var ingred = {
           ingredient : name,
           amount : amount,
