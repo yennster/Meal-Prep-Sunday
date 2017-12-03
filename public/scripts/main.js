@@ -423,16 +423,22 @@ MealPrepSunday.prototype.saveImport = function(e) {
           units = ingredients[i].substr(units.length + amount.length + 2);
         }
         if (units.match(/\d+/g)) {
-          units = amount + " " + units;
-          var index = units.indexOf("/");
-          amount = eval(units.substring(0, index + 2))
-          units = units.substring(index + 2);
+          var old_units = amount + " " + units;
+          amount = amount + " " + units;
+          units1 = ingredients[i].substr(old_units.length + 1);
+          units = units1.substring(0, units1.indexOf(' '));
+          name = units1.substring(units1.indexOf(' '));
         }
         amount = amount.toString();
         if (amount.indexOf("-") != -1) {
           amount = amount.substr(amount.indexOf('-') + 1);
         }
-        if (amount.includes("¾")) {
+        if (amount.indexOf("/") != -1) {
+          var slashIndex = amount.indexOf("/");
+          var total = amount.substring(0, slashIndex - 2);
+          var frac = eval(amount.substr(slashIndex - 2));
+          amount = +total + +frac;
+        } else if (amount.includes("¾")) {
           var fracIndex = amount.indexOf("¾");
           var total = amount.substring(0, fracIndex);
           amount = eval(total + ".75");
@@ -451,8 +457,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
         } else if (amount.match(/\d+/g) == null) {
           name = amount + " " + name;
           amount = 0;
-        } else {
-          amount = eval(amount);
         }
         if (units.includes('cup') || units.includes('Cup')) {
           units = "cups";
@@ -460,11 +464,13 @@ MealPrepSunday.prototype.saveImport = function(e) {
           units = "tsp";
         } else if (units.includes('tablespoon') || units.includes('Tablespoon') || units.includes('tbsp')) {
           units = "tbsp";
+        } else if (units.includes('lb') || units.includes('lbs') || units.includes('pound') || units.includes('Pound')) {
+          units = "lbs";
         } else {
           name = units + " " + name;
           units = "units";
         }
-        //console.log("name: " + name + ", amount: " + amount + ", units: " + units);
+        console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         var ingred = {
           ingredient : name,
           amount : amount,
