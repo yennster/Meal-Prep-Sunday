@@ -238,7 +238,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
                           + name + "' id='new_name" + num + "'>";
   amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                           + current_amt + "' id='new_amount" + num + "'>";
-  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">' +
+  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth" style="z-index:900;">' +
             '<input class="mdl-textfield__input" type="text" id="new_units' + num + '" data-val="' + current_units + '" readonly>' +
             '<label for="new_units' + num + '">' +
                 '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
@@ -322,7 +322,7 @@ MealPrepSunday.INGREDIENT_TEMPLATE =
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
-      '<td class="mdl-data-table__cell">' +
+      '<td class="zindex mdl-data-table__cell">' +
         '<button class="inventory-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
         '<button class="inventory-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
         '<button class="inventory-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
@@ -507,7 +507,7 @@ MealPrepSunday.RECIPE_ADD_INGRED_TEMPLATE =
         '<input class="mdl-textfield__input" step="any" type="number" id="recipe_ingredient_amount0">' +
         '<label class="mdl-textfield__label" for="recipe_ingredient_amount0">Amount</label>' +
       '</div>' +
-      '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">' +
+      '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth">' +
           '<input class="mdl-textfield__input" type="text" id="recipe_ingredient_units0" readonly>' +
           '<label for="recipe_ingredient_units0">' +
               '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
@@ -616,7 +616,7 @@ MealPrepSunday.prototype.editItem = function(e) {
                     + name + "' id='new_item_name" + num + "'>";
   amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                     + current_amt + "' id='new_item_amount" + num + "'>";
-  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">' +
+  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth">' +
             '<input class="mdl-textfield__input" type="text" id="new_item_units' + num + '" data-val="' + current_units + '" readonly>' +
             '<label for="new_item_units' + num + '">' +
                 '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
