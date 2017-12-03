@@ -416,59 +416,154 @@ MealPrepSunday.prototype.saveImport = function(e) {
       for (var i = 0; i < ingredients.length; i++) {
         var newKey = recipeRef.push().key;
         var amount = ingredients[i].substr(0, ingredients[i].indexOf(' '));
-        var units1 = ingredients[i].substr(ingredients[i].indexOf(' ') + 1);
-        var units = ingredients[i].substr(amount.length + 1, units1.indexOf(' '));
-        var name = ingredients[i].substr(units.length + amount.length + 1);
-        if (units.includes("heaping")) {
-          units = ingredients[i].substr(units.length + amount.length + 2);
-        }
-        if (units.match(/\d+/g)) {
-          var old_units = amount + " " + units;
-          amount = amount + " " + units;
-          units1 = ingredients[i].substr(old_units.length + 1);
-          units = units1.substring(0, units1.indexOf(' '));
-          name = units1.substring(units1.indexOf(' '));
-        }
-        amount = amount.toString();
-        if (amount.indexOf("-") != -1) {
-          amount = amount.substr(amount.indexOf('-') + 1);
-        }
-        if (amount.indexOf("/") != -1) {
-          var slashIndex = amount.indexOf("/");
-          var total = amount.substring(0, slashIndex - 2);
-          var frac = eval(amount.substr(slashIndex - 2));
-          amount = +total + +frac;
-        } else if (amount.includes("¾")) {
-          var fracIndex = amount.indexOf("¾");
-          var total = amount.substring(0, fracIndex);
-          amount = eval(total + ".75");
-        } else if (amount.includes("½")) {
-          var fracIndex = amount.indexOf("½");
-          var total = amount.substring(0, fracIndex);
-          amount = eval(total + ".5");
-        } else if (amount.includes("¼")) {
-          var fracIndex = amount.indexOf("¼");
-          var total = amount.substring(0, fracIndex);
-          amount = eval(total + ".25");
-        } else if (amount.includes("⅓")) {
-          var fracIndex = amount.indexOf("⅓");
-          var total = amount.substring(0, fracIndex);
-          amount = eval(total + ".33");
-        } else if (amount.match(/\d+/g) == null) {
-          name = amount + " " + name;
-          amount = 0;
-        }
-        if (units.includes('cup') || units.includes('Cup')) {
-          units = "cups";
-        } else if (units.includes('teaspoon') || units.includes('Teaspoon') || units.includes('tsp')) {
-          units = "tsp";
-        } else if (units.includes('tablespoon') || units.includes('Tablespoon') || units.includes('tbsp')) {
-          units = "tbsp";
-        } else if (units.includes('lb') || units.includes('lbs') || units.includes('pound') || units.includes('Pound')) {
-          units = "lbs";
+        console.log(ingredients[i].match(/\d+/g) == null );
+        if (ingredients[i].match(/\d+/g) == null && !amount.includes("¾") && !amount.includes("½") && !amount.includes("¼") && !amount.includes("⅓")){
+          var amount = 0;
+          var units = "units";
+          var name = ingredients[i];
         } else {
-          name = units + " " + name;
-          units = "units";
+          var units1 = ingredients[i].substr(ingredients[i].indexOf(' ') + 1);
+          var units = ingredients[i].substr(amount.length + 1, units1.indexOf(' '));
+          var name = ingredients[i].substr(units.length + amount.length + 1);
+          if (units.includes("heaping")) {
+            units = ingredients[i].substr(units.length + amount.length + 2);
+          }
+          if (units.match(/\d+/g)) {
+            var old_units = amount + " " + units;
+            amount = amount + " " + units;
+            units1 = ingredients[i].substr(old_units.length + 1);
+            units = units1.substring(0, units1.indexOf(' '));
+            name = units1.substring(units1.indexOf(' '));
+          }
+          amount = amount.toString();
+          if (amount.indexOf("-") != -1) {
+            amount = amount.substr(amount.indexOf('-') + 1);
+          }
+          if (amount.indexOf("/") != -1) {
+            var slashIndex = amount.indexOf("/");
+            var total = amount.substring(0, slashIndex - 2);
+            var frac = eval(amount.substr(slashIndex - 2));
+            amount = +total + +frac;
+          } else if (amount.includes("¾")) {
+            var fracIndex = amount.indexOf("¾");
+            var total = amount.substring(0, fracIndex);
+            amount = eval(total + ".75");
+          } else if (amount.includes("½")) {
+            var fracIndex = amount.indexOf("½");
+            var total = amount.substring(0, fracIndex);
+            amount = eval(total + ".5");
+          } else if (amount.includes("¼")) {
+            var fracIndex = amount.indexOf("¼");
+            var total = amount.substring(0, fracIndex);
+            amount = eval(total + ".25");
+          } else if (amount.includes("⅓")) {
+            var fracIndex = amount.indexOf("⅓");
+            var total = amount.substring(0, fracIndex);
+            amount = eval(total + ".33");
+          } else if (amount.match(/\d+/g) == null) {
+            name = amount + " " + name;
+            amount = 0;
+          }
+          if (units.includes('cup') || units.includes('Cup')) {
+            units = "cups";
+          } else if (units.includes('teaspoon') || units.includes('Teaspoon') || units.includes('tsp')) {
+            units = "tsp";
+          } else if (units.includes('tablespoon') || units.includes('Tablespoon') || units.includes('tbsp')) {
+            units = "tbsp";
+          } else if (units.includes('lb') || units.includes('lbs') || units.includes('pound') || units.includes('Pound')) {
+            units = "lbs";
+          } else {
+            name = units + " " + name;
+            units = "units";
+          }
+        }
+        if (name.indexOf("chopped") != -1) {
+          name = name.replace("chopped",'');
+        }
+        if (name.indexOf("divided") != -1) {
+          name = name.replace("divided",'');
+        }
+        if (name.indexOf("thinly") != -1) {
+          name = name.replace("thinly",'');
+        }
+        if (name.indexOf("fresh") != -1) {
+          name = name.replace("fresh",'');
+        }
+        if (name.indexOf("softened") != -1) {
+          name = name.replace("softened",'');
+        }
+        if (name.indexOf("warm") != -1) {
+          name = name.replace("warm",'');
+        }
+        if (name.indexOf("peeled") != -1) {
+          name = name.replace("peeled",'');
+        }
+        if (name.indexOf("diced") != -1) {
+          name = name.replace("diced",'');
+        }
+        if (name.indexOf("sliced") != -1) {
+          name = name.replace("sliced",'');
+        }
+        if (name.indexOf("cooked") != -1) {
+          name = name.replace("cooked",'');
+        }
+        if (name.indexOf("frozen") != -1) {
+          name = name.replace("frozen",'');
+        }
+        if (name.indexOf("shredded") != -1) {
+          name = name.replace("shredded",'');
+        }
+        if (name.indexOf("very") != -1) {
+          name = name.replace("very",'');
+        }
+        if (name.indexOf("ripe") != -1) {
+          name = name.replace("ripe",'');
+        }
+        if (name.indexOf("squeeze of") != -1) {
+          name = name.replace("squeeze of",'');
+        }
+        if (name.indexOf("pinch of") != -1) {
+          name = name.replace("pinch of",'');
+        }
+        if (name.indexOf("A ") != -1) {
+          name = name.replace("A ",'');
+        }
+        if (name.indexOf("and") != -1) {
+          name = name.replace("and",'');
+        }/**
+        if (name.indexOf("or") != -1) {
+          var orRecipe = name.substring(name.indexOf("or"));
+          name = name.replace(orRecipe,'');
+        }
+        if (name.indexOf("-") != -1) {
+          var dashRecipe = name.substring(name.indexOf("-"));
+          name = name.replace(dashRecipe,'');
+        }**/
+        if (name.indexOf("(") != -1) {
+          if (name.indexOf(")") != -1) {
+            var parentheses = name.substring(name.indexOf("(") - 1, name.indexOf(")") + 1);
+            name = name.replace(parentheses,'');
+          }
+        }
+        if (name.indexOf("(") != -1) {
+          var parentheses = name.substring(name.indexOf("("));
+          name = name.replace(parentheses,'');
+        } else if (name.indexOf(")") != -1) {
+          var parentheses = name.substring(0, name.indexOf(")") + 1);
+          name = name.replace(parentheses,'');
+        }
+        if (amount.toString().indexOf("(") != -1) {
+          var parentheses = amount.toString().substring(amount.toString().indexOf("("));
+          amount = amount.toString().replace(parentheses,'');
+        } else if (amount.toString().indexOf(")") != -1) {
+          var parentheses = amount.toString().substring(0, amount.toString().indexOf(")") + 1);
+          amount = amount.toString().replace(parentheses,'');
+        }
+        if (name.indexOf(", ") != -1) {
+          name = name.replace(", ",' ');
+        }
+        if (name.indexOf("Club House") != -1) {
+          name = name.replace("Club House",'');
         }
         console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         var ingred = {
@@ -663,6 +758,7 @@ MealPrepSunday.RECIPE_TEMPLATE =
       //'<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
       //'<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
       '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
+      '<button class="recipe-add-to-grocery-list mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">add_shopping_cart</i></button>' +
     '</div>';
 
 MealPrepSunday.RECIPE_INGRDS_TEMPLATE =
