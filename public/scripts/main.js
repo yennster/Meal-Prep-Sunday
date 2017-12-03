@@ -821,21 +821,23 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Feed ~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
  MealPrepSunday.prototype.loadPublicRecipes = function() {
-   this.publicRef = this.database.ref("/public-recipes").orderByChild("time");//.limitToLast(20);
+   this.publicRef = this.database.ref("/public-recipes")//.orderByChild("time");.limitToLast(20);
    this.publicRef.off();
-   var numRecipes = 0;
+   var numPublicRecipes = 0;
    var setPublicRecipe = function(data) {
      var val = data.val();
      var recipeKey = val.recipe;
      var userID = val.user;
      var mps = this;
+     console.log(numPublicRecipes);
      this.database.ref("/users/" + userID + "/recipes/" + recipeKey).once('value').then(function(snapshot) {
         var rcp = snapshot.val();
         if (rcp == null) return;
         var key = snapshot.key;
-        mps.displayPublicRecipes(key, rcp.name, rcp.recipe, rcp.ingredients, rcp.likes, numRecipes);
+        numPublicRecipes++;
+        mps.displayPublicRecipes(key, rcp.name, rcp.recipe, rcp.ingredients, rcp.likes, numPublicRecipes);
+
       });
-      numRecipes++;
    }.bind(this);
    this.publicRef.on('child_added', setPublicRecipe);
  };
@@ -851,9 +853,19 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    var rcp = container.firstChild.nextSibling;
    rcp.setAttribute('id', "public_recipe_data" + num);
    rcp.innerHTML += "<pre>" + recipe + "</pre>";
+   rcp.setAttribute('style', "padding-bottom:0px;");
+   var onclick = "$(" + "'#public_recipe_ingrds" + num + "').parent().toggle();"
+   var show_ingred =
+     "<div class='show-ingredients'><button class='mdl-button mdl-js-button mdl-button--icon mdl-button--colored'>" +
+       '<i class="material-icons">expand_more</i>' +
+     '</button></div>';
+   rcp.innerHTML += show_ingred;
+   rcp.firstChild.nextSibling.firstChild.setAttribute('onclick', onclick);
    var ingrd = container.firstChild.nextSibling.nextSibling;
    ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
    ingrd.firstChild.setAttribute('id', "public_recipe_ingrds" + num);
+   console.log(ingrd);
+   ingrd.setAttribute('style', "display:none;padding:0px;width:100%;");
    var sortedKeys = Object.keys(ingredients).sort();
    for (var i = 0; i < sortedKeys.length; i++) {
      var row = document.createElement('tr');
