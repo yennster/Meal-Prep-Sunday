@@ -40,6 +40,9 @@ function MealPrepSunday() {
   this.createRecipeIngredientsNumAdded = 0;
   this.addRecipe = document.getElementById('add-recipe');
   this.recipePublic = document.getElementById('recipe-public');
+  this.importRecipe = document.getElementById('import-recipe');
+  this.importLink = document.getElementById('recipe_link');
+  this.importForm = document.getElementById('import-form');
 
   // ====================== Button/Input Handlers ======================
   var buttonTogglingHandler = this.toggleButton.bind(this);
@@ -51,11 +54,14 @@ function MealPrepSunday() {
   this.recipeInput.addEventListener('change', buttonTogglingHandler);
   this.itemInput.addEventListener('keyup', buttonTogglingHandler);
   this.itemInput.addEventListener('change', buttonTogglingHandler);
+  this.importLink.addEventListener('keyup', buttonTogglingHandler);
+  this.importLink.addEventListener('change', buttonTogglingHandler);
 
   // ====================== Save Button Handlers ======================
   this.inventoryForm.addEventListener('submit', this.saveIngredient.bind(this));
   this.recipeForm.addEventListener('submit', this.saveRecipe.bind(this));
   this.groceryForm.addEventListener('submit', this.saveItem.bind(this));
+  this.importForm.addEventListener('submit', this.saveImport.bind(this));
 
   // ====================== Sign-out/Sign-in Handlers ======================
   this.signOutButton.addEventListener('click', this.signOut.bind(this));
@@ -384,6 +390,84 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
   }
 };
 
+MealPrepSunday.prototype.saveImport = function(e) {
+  e.preventDefault();
+
+  if (this.importLink.value && this.checkSignedInWithMessage()) {
+    var currentUser = this.auth.currentUser.uid;
+    var recipe_link = this.importLink.value;
+    var recipe_id = recipe_link.substring(31);
+    console.log(recipe_id);
+    var yummly_id = "004619c4";
+    var yummly_key = "86b46ce6f6b2e672f933aba75ff2de10";
+    var url = "http://api.yummly.com/v1/api/recipe/" + recipe_id + "?_app_id=" + yummly_id + "&_app_key=" + yummly_key;
+    console.log(url);
+    var database = this.database;
+    var blah = this;
+    fetch(url).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      var ingredients = data.ingredientLines;
+      var recipe_name = data.name;
+      var ingredUpdates = {};
+      var recipeRef = database.ref("/users/" + currentUser + "/recipes");
+      for (var i = 0; i < ingredients.length; i++) {
+        var newKey = recipeRef.push().key;
+        var amount = ingredients[i].substr(0, ingredients[i].indexOf(' '));
+        var units1 = ingredients[i].substr(ingredients[i].indexOf(' ') + 1);
+        var units = ingredients[i].substr(amount.length + 1, units1.indexOf(' '));
+        var name = ingredients[i].substr(units.length + amount.length + 2);
+        var substrings = ["cup*", "teaspoon*", "tablespoon*"];
+        if (new RegExp(substrings.join("|")).test(units)) {
+          if (units.includes('cup')) {
+            units = "cups";
+          } else if (units.includes('teaspoon')) {
+            units = "tsp";
+          } else if (units.includes('tablespoon')) {
+            units = "tbsp";
+          }
+        } else {
+          name = units + " " + name;
+          units = "units";
+        }
+        console.log(name);
+        console.log(amount);
+        console.log(units);
+        if (amount == "¾") {
+          amount = 0.75;
+        } else if (amount == "½") {
+          amount = 0.5;
+        } else if (amount == "¼") {
+          amount = 0.25;
+        } else {
+          amount = eval(amount);
+        }
+        var ingred = {
+          ingredient : name,
+          amount : amount,
+          units : units
+        }
+        ingredUpdates[newKey] = ingred;
+      }
+      var recipeData = {
+        name: recipe_name,
+        recipe: "<a target='_blank' href='" + data.source.sourceRecipeUrl + "'>" + data.source.sourceRecipeUrl + "</a>",
+        ingredients: ingredUpdates,
+        public: false,
+        likes: 0
+      }
+      var updates = {};
+      var recipeKey = recipeRef.push().key;
+      updates["/users/" + currentUser + "/recipes/" + recipeKey] = recipeData;
+      console.log(recipeData);
+      database.ref().update(updates).then(function() {
+        MealPrepSunday.resetMaterialTextfield(document.getElementById('recipe_link'));
+        blah.toggleButton();
+      }.bind(this));
+    });
+  }
+};
+
 MealPrepSunday.prototype.removeRecipe = function(e) {
   var target = e.target.parentNode;
   if ((!$(target).hasClass("recipe-remove"))) return;
@@ -422,9 +506,18 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   var rcp = container.firstChild.nextSibling;
   rcp.setAttribute('id', "recipe_data" + num);
   rcp.innerHTML += "<pre>" + recipe + "</pre>";
+  rcp.setAttribute('style', "padding-bottom:0px;");
+  var onclick = "$(" + "'#recipe_ingrds" + num + "').parent().toggle();"
+  var show_ingred =
+    "<div class='show-ingredients'><button class='mdl-button mdl-js-button mdl-button--icon mdl-button--colored'>" +
+      '<i class="material-icons">expand_more</i>' +
+    '</button></div>';
+  rcp.innerHTML += show_ingred;
+  rcp.firstChild.nextSibling.firstChild.setAttribute('onclick', onclick);
   var ingrd = container.firstChild.nextSibling.nextSibling;
   ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
   ingrd.firstChild.setAttribute('id', "recipe_ingrds" + num);
+  ingrd.setAttribute('style', "display:none;padding:0px;width:100%;");
   var sortedKeys = Object.keys(ingredients).sort();
   for (var i = 0; i < sortedKeys.length; i++) {
     var row = document.createElement('tr');
@@ -437,9 +530,9 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
     ingrd.firstChild.firstChild.nextSibling.appendChild(row);
   }
   var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
-  btns.setAttribute('id', "recipe_edit" + num);
-  btns.nextSibling.setAttribute('id', "recipe_save" + num);
-  btns.nextSibling.nextSibling.setAttribute('id', "recipe_remove" + num);
+  //btns.setAttribute('id', "recipe_edit" + num);
+  //btns.nextSibling.setAttribute('id', "recipe_save" + num);
+  btns.setAttribute('id', "recipe_remove" + num); //btns.nextSibling.nextSibling
   var likesHeart =
     '<span class="recipe_likes"><button disabled class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">' +
       '<i class="material-icons">favorite</i></button>';
@@ -448,7 +541,7 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   } else {
     likesHeart += likes + ' likes</span>';
   }
-  btns.nextSibling.nextSibling.outerHTML += likesHeart;
+  btns.outerHTML += likesHeart; //btns.nextSibling.nextSibling
   this.recipeList.appendChild(container);
 };
 
@@ -536,8 +629,8 @@ MealPrepSunday.RECIPE_TEMPLATE =
     '<div class="recipe-ingrd-data mdl-card__supporting-text" style="padding:0;width:100%;">' +
     '</div>' +
     '<div class="mdl-card__actions mdl-card--border" style="width:100%">' +
-      '<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
-      '<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
+      //'<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
+      //'<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
       '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
     '</div>';
 
@@ -871,14 +964,16 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Helper Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   */
 MealPrepSunday.prototype.toggleButton = function() {
-  if (this.ingredientInput.value || this.recipeInput.value || this.itemInput.value) {
+  if (this.ingredientInput.value || this.recipeInput.value || this.itemInput.value || this.importLink.value) {
     this.addIngredient.removeAttribute('disabled');
     this.addRecipe.removeAttribute('disabled');
     this.addGroceryItem.removeAttribute('disabled');
+    this.importRecipe.removeAttribute('disabled');
   } else {
     this.addIngredient.setAttribute('disabled', 'true');
     this.addRecipe.setAttribute('disabled', 'true');
     this.addGroceryItem.setAttribute('disabled', 'true');
+    this.importRecipe.setAttribute('disabled', 'true');
   }
 };
 

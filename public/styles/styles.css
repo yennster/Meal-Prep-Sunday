@@ -102,3 +102,10 @@ pre {
   font-size: 14px;
   color: rgba(0,0,0,.54);
 }
+
+.show-ingredients {
+  margin: auto;
+  text-align: center;
+  padding-top: 16px;
+  padding-bottom: 8px;
+}
