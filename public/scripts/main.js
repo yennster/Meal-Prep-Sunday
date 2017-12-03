@@ -727,7 +727,7 @@ MealPrepSunday.prototype.editItem = function(e) {
                     + name + "' id='new_item_name" + num + "'>";
   amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                     + current_amt + "' id='new_item_amount" + num + "'>";
-  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth">' +
+  units.innerHTML = '<div class="cell-overflow mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth">' +
             '<input class="mdl-textfield__input" type="text" id="new_item_units' + num + '" data-val="' + current_units + '" readonly>' +
             '<label for="new_item_units' + num + '">' +
                 '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
@@ -810,7 +810,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
     '<tr>' +
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
-      '<td class="mdl-data-table__cell--non-numeric"></td>' +
+      '<td class="mdl-data-table__cell--non-numeric" class="zindex"></td>' +
       '<td class="mdl-data-table__cell">' +
         '<button class="grocery-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
         '<button class="grocery-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +

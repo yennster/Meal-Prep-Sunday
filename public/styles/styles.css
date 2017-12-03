@@ -77,7 +77,7 @@ pre {
 }
 
 .zindex {
-  z-index: 10 !important;
+  z-index: 0 !important;
 }
 
 .recipe_likes {
@@ -108,4 +108,8 @@ pre {
   text-align: center;
   padding-top: 16px;
   padding-bottom: 8px;
+}
+
+.mdl-menu__item {
+  z-index: 999 !important;
 }
