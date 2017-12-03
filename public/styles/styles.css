@@ -113,3 +113,8 @@ pre {
 .mdl-menu__item {
   z-index: 999 !important;
 }
+
+.edit-recipe-units {
+  width: 100% !important;
+  height: 100px !important;
+}
