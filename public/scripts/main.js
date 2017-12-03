@@ -153,6 +153,9 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
   } else { // User is signed out!
     this.loadPublicRecipes();
     $(document).on('click', '.public-recipe-like', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.create-recipe', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.add-grocery', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.add-ingred', this.checkSignedInWithMessage.bind(this));
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
     this.userPic.setAttribute('hidden', 'true');
