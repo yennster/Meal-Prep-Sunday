@@ -409,7 +409,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
       return response.json();
     }).then(function(data) {
       var ingredients = data.ingredientLines;
-      console.log(ingredients);
+      //console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
       var recipeRef = database.ref("/users/" + currentUser + "/recipes");
@@ -576,7 +576,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (name.indexOf("Club House") != -1) {
           name = name.replace("Club House",'');
         }
-        console.log("name: " + name + ", amount: " + amount + ", units: " + units);
+        //console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         var ingred = {
           ingredient : name,
           amount : amount,
@@ -698,13 +698,13 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   recipe.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
                           + recipe_name + "' id='new_name" + num + "'>";
   var steps = document.getElementById("recipe_data" + num);
-  var steps_data = steps.textContent;
+  var steps_data = steps.firstChild.textContent;
   steps.innerHTML = '<textarea class="mdl-textfield__input" type="text" rows="7"' +
     'id="new_recipe_data' + num + '">';
   $('#new_recipe_data' + num).val(steps_data);
   var steps_div = $('#new_recipe_data' + num);
   steps_div.attr('style', "padding-bottom:0px;");
-  $('#recipe_ingrds' + num).parent().toggle();
+  $('#recipe_ingrds' + num).parent().show();
   var tbody = document.getElementById('recipe_ingrds' + num).firstChild.nextSibling;
   var num_rows = tbody.childElementCount;
   for (var i = 0; i < num_rows; i++) {
@@ -738,12 +738,66 @@ MealPrepSunday.prototype.editRecipe = function(e) {
                   '<li class="mdl-menu__item" data-val="lbs">lbs</li>' +
                   '<li class="mdl-menu__item" data-val="grams">grams</li>' +
               '</ul></div>';
-    console.log(row);
-    //units.value = current_units;
   }
   componentHandler.upgradeDom();
   getmdlSelect.init(".getmdl-select");
   var currentUser = this.auth.currentUser.uid;
+  var recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
+  $("#recipe_save" + num).on('click', function(e) {
+    if ((!$(e.target.parentNode).hasClass("recipe-submit"))) return;
+    e.preventDefault();
+    var ingredUpdates = {};
+    for (var i = 0; i < num_rows; i++) {
+      var new_key = recipeRef.push().key;
+      var row = document.getElementById('recipe' + num + "_ingrd" + i);
+      var new_item = document.getElementById('new_recipe' + num + "_name" + i).value;
+      var new_item_amt = document.getElementById('new_recipe' + num + "_amount" + i).value;
+      var new_item_unt = document.getElementById('new_recipe' + num + "_units" + i).value;
+      ingredUpdates[new_key] = {
+        ingredient: new_item,
+        amount: new_item_amt,
+        units: new_item_unt
+      }
+      row.firstChild.innerHTML = new_item;
+      row.firstChild.nextSibling.innerHTML = new_item_amt;
+      row.firstChild.nextSibling.nextSibling.innerHTML = new_item_unt;
+    }
+    var new_name = document.getElementById("new_name" + num).value;
+    var new_recipe = document.getElementById('new_recipe_data' + num).value;
+    var curlikes;
+    var pub;
+    recipeRef.child(key).once('value').then(function(snapshot) {
+       var data = snapshot.val();
+       curlikes = data.likes;
+       pub = data.public;
+       recipeRef.child(key).set({
+         name: new_name,
+         ingredients: ingredUpdates,
+         recipe: new_recipe,
+         public: pub,
+         likes: curlikes
+       }).then(function() {
+         document.getElementById("recipe_name" + num).innerHTML = new_name;
+         var rcp = document.getElementById("recipe_data" + num);
+         rcp.innerHTML = "<pre>" + new_recipe + "</pre>";
+         var onclick = "$(" + "'#recipe_ingrds" + num + "').parent().toggle();"
+         var show_ingred =
+           "<div class='show-ingredients'><button class='mdl-button mdl-js-button mdl-button--icon mdl-button--colored'>" +
+             '<i class="material-icons">expand_more</i>' +
+           '</button></div>';
+         rcp.innerHTML += show_ingred;
+         rcp.firstChild.nextSibling.firstChild.setAttribute('onclick', onclick);
+         $('#recipe_ingrds' + num).parent().hide();
+         target.style.display = "inline";
+         target.nextSibling.style.display = "none";
+         $('.recipe-edit').prop('disabled', false);
+         $('.recipe-remove').prop('disabled', false);
+         $('.recipe-add-to-grocery-list').prop('disabled', false);
+       }.bind(this)).catch(function(error) {
+         console.error('Error writing new message to Firebase Database', error);
+       });
+     });
+  });
 };
 
 MealPrepSunday.prototype.recipeAddIngredient = function(e) {
