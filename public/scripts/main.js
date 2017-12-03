@@ -222,6 +222,7 @@ MealPrepSunday.prototype.loadInventory = function() {
 MealPrepSunday.prototype.editIngredient = function(e) {
   e.preventDefault();
   var target = e.target.parentNode;
+  if ((!$(target).hasClass("inventory-edit"))) return;
   target.style.display = "none";
   target.nextSibling.style.display = "inline";
   $('.inventory-edit').prop('disabled', true);
@@ -232,22 +233,48 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   var amount = document.getElementById("amount" + num);
   var name = ingredient.textContent;
   var current_amt = amount.textContent;
+  var units = document.getElementById("units" + num);
+  var current_units = units.textContent;
   ingredient.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
                           + name + "' id='new_name" + num + "'>";
   amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                           + current_amt + "' id='new_amount" + num + "'>";
+  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">' +
+            '<input class="mdl-textfield__input" type="text" id="new_units' + num + '" data-val="' + current_units + '" readonly>' +
+            '<label for="new_units' + num + '">' +
+                '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
+            '</label>' +
+            '<label for="new_units' + num + '" class="mdl-textfield__label">Units</label>' +
+            '<ul for="new_units' + num + '" class="mdl-menu mdl-menu--bottom-left mdl-js-menu flexdropdown">' +
+                '<li class="mdl-menu__item" data-val="units">units</li>' +
+                '<li class="mdl-menu__item" data-val="cups">cups</li>' +
+                '<li class="mdl-menu__item" data-val="tsp">tsp</li>' +
+                '<li class="mdl-menu__item" data-val="tbsp">tbsp</li>' +
+                '<li class="mdl-menu__item" data-val="ounces">ounces</li>' +
+                '<li class="mdl-menu__item" data-val="pints">pints</li>' +
+                '<li class="mdl-menu__item" data-val="gallons">gallons</li>' +
+                '<li class="mdl-menu__item" data-val="quarts">quarts</li>' +
+                '<li class="mdl-menu__item" data-val="liters">liters</li>' +
+                '<li class="mdl-menu__item" data-val="lbs">lbs</li>' +
+                '<li class="mdl-menu__item" data-val="grams">grams</li>' +
+            '</ul></div>';
+  componentHandler.upgradeDom();
+  getmdlSelect.init(".getmdl-select");
   var currentUser = this.auth.currentUser.uid;
   var inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
   $("#save" + num).on("click", function(e) {
     e.preventDefault();
     var new_ingred = document.getElementById("new_name" + num).value;
     var new_amt = document.getElementById("new_amount" + num).value;
+    var new_unt = document.getElementById("new_units" + num).value;
     inventoryRef.child(key).set({
       ingredient: new_ingred,
       amount: new_amt,
+      units: new_unt
     }).then(function() {
       document.getElementById("name" + num).innerHTML = new_ingred;
       document.getElementById("amount" + num).innerHTML = new_amt;
+      document.getElementById("units" + num).innerHTML = new_unt;
       target.style.display = "inline";
       target.nextSibling.style.display = "none";
       $('.inventory-edit').prop('disabled', false);
@@ -260,6 +287,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
 
 MealPrepSunday.prototype.removeIngredient = function(e) {
   var target = e.target.parentNode;
+  if ((!$(target).hasClass("inventory-remove"))) return;
   var num = target.id.substring(6);
   var key = target.parentNode.parentNode.id;
   document.getElementById("name" + num + "").parentNode.outerHTML="";
@@ -359,6 +387,7 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
 
 MealPrepSunday.prototype.removeRecipe = function(e) {
   var target = e.target.parentNode;
+  if ((!$(target).hasClass("recipe-remove"))) return;
   var num = target.id.substring(13);
   var key = target.parentNode.parentNode.id;
   document.getElementById("recipe_name" + num + "").parentNode.parentNode.outerHTML="";
@@ -408,12 +437,6 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
     row.firstChild.nextSibling.nextSibling.textContent = ingred.units;
     ingrd.firstChild.firstChild.nextSibling.appendChild(row);
   }
-  /**
-  var publicData = container.firstChild.nextSibling.nextSibling.nextSibling;
-  publicData.innerHTML =
-    '<span id="' + "recipe_public" + num + '">Public: ' + pub + '</span>' + ", " +
-    '<span id="' + "recipe_likes" + num + '">Likes: ' + likes + '</span>';
-    **/
   var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   btns.setAttribute('id', "recipe_edit" + num);
   btns.nextSibling.setAttribute('id', "recipe_save" + num);
@@ -433,6 +456,7 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
 MealPrepSunday.prototype.editRecipe = function(e) {
   e.preventDefault();
   var target = e.target.parentNode;
+  if ((!$(target).hasClass("recipe-edit"))) return;
   target.style.display = "none";
   $('.recipe-edit').prop('disabled', true);
   $('.recipe-remove').prop('disabled', true);
@@ -576,6 +600,7 @@ MealPrepSunday.prototype.loadGroceryList = function() {
 MealPrepSunday.prototype.editItem = function(e) {
   e.preventDefault();
   var target = e.target.parentNode;
+  if ((!$(target).hasClass("grocery-edit"))) return;
   target.style.display = "none";
   target.nextSibling.style.display = "inline";
   $('.grocery-edit').prop('disabled', true);
@@ -584,24 +609,50 @@ MealPrepSunday.prototype.editItem = function(e) {
   var key = target.parentNode.parentNode.id;
   var item = document.getElementById("item_name" + num);
   var amount = document.getElementById("item_amount" + num);
+  var units = document.getElementById("item_units" + num);
   var name = item.textContent;
   var current_amt = amount.textContent;
+  var current_units = units.textContent;
   item.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
                     + name + "' id='new_item_name" + num + "'>";
   amount.innerHTML = "<input class='mdl-textfield__input' step='any' type='number' value='"
                     + current_amt + "' id='new_item_amount" + num + "'>";
+  units.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">' +
+            '<input class="mdl-textfield__input" type="text" id="new_item_units' + num + '" data-val="' + current_units + '" readonly>' +
+            '<label for="new_item_units' + num + '">' +
+                '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
+            '</label>' +
+            '<label for="new_item_units' + num + '" class="mdl-textfield__label">Units</label>' +
+            '<ul for="new_item_units' + num + '" class="mdl-menu mdl-menu--bottom-left mdl-js-menu flexdropdown">' +
+                '<li class="mdl-menu__item" data-val="units">units</li>' +
+                '<li class="mdl-menu__item" data-val="cups">cups</li>' +
+                '<li class="mdl-menu__item" data-val="tsp">tsp</li>' +
+                '<li class="mdl-menu__item" data-val="tbsp">tbsp</li>' +
+                '<li class="mdl-menu__item" data-val="ounces">ounces</li>' +
+                '<li class="mdl-menu__item" data-val="pints">pints</li>' +
+                '<li class="mdl-menu__item" data-val="gallons">gallons</li>' +
+                '<li class="mdl-menu__item" data-val="quarts">quarts</li>' +
+                '<li class="mdl-menu__item" data-val="liters">liters</li>' +
+                '<li class="mdl-menu__item" data-val="lbs">lbs</li>' +
+                '<li class="mdl-menu__item" data-val="grams">grams</li>' +
+            '</ul></div>';
+  componentHandler.upgradeDom();
+  getmdlSelect.init(".getmdl-select");
   var currentUser = this.auth.currentUser.uid;
   var groceryRef = this.database.ref("/users/" + currentUser + "/grocery-list");
   $("#item_save" + num).on('click', function(e) {
     e.preventDefault();
     var new_item = document.getElementById("new_item_name" + num).value;
     var new_item_amt = document.getElementById("new_item_amount" + num).value;
+    var new_item_unt = document.getElementById("new_item_units" + num).value;
     groceryRef.child(key).set({
       item: new_item,
       amount: new_item_amt,
+      units: new_item_unt
     }).then(function() {
       document.getElementById("item_name" + num).innerHTML = new_item;
       document.getElementById("item_amount" + num).innerHTML = new_item_amt;
+      document.getElementById("item_units" + num).innerHTML = new_item_unt;
       target.style.display = "inline";
       target.nextSibling.style.display = "none";
       $('.grocery-edit').prop('disabled', false);
@@ -614,6 +665,7 @@ MealPrepSunday.prototype.editItem = function(e) {
 
 MealPrepSunday.prototype.removeItem = function(e) {
   var target = e.target.parentNode;
+  if ((!$(target).hasClass("grocery-remove"))) return;
   var num = target.id.substring(11);
   var key = target.parentNode.parentNode.id;
   document.getElementById("item_name" + num + "").parentNode.outerHTML="";
@@ -724,10 +776,11 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    }
    var current_likes = likes_div.firstChild.nextSibling;
    current_likes.setAttribute('id', "current_likes" + num);
+   current_likes.setAttribute('class', "likes");
    if (likes == 1) {
-     current_likes.innerHTML = " " + likes + " like";
+     current_likes.innerHTML = likes + " like";
    } else {
-     current_likes.innerHTML = " " + likes + " likes";
+     current_likes.innerHTML = likes + " likes";
    }
    this.publicRecipeList.appendChild(container);
  };
@@ -735,7 +788,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
  MealPrepSunday.prototype.likePublicRecipe = function(e) {
    e.preventDefault();
    var target = e.target.parentNode;
-   console.log(target);
+   if ((!$(target).hasClass("public-recipe-like"))) return;
    var likes_div = target.parentNode;
    var num = target.id.substring(19);
    var key = target.parentNode.parentNode.id;
@@ -755,9 +808,9 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      currentLikes = snapshot.val().likes + 1;
      likesRef.update({ "likes" : currentLikes });
      if (currentLikes == 1) {
-       likes_div.firstChild.nextSibling.innerHTML = " " + currentLikes + " like";
+       likes_div.firstChild.nextSibling.innerHTML = currentLikes + " like";
      } else {
-       likes_div.firstChild.nextSibling.innerHTML = " " + currentLikes + " likes";
+       likes_div.firstChild.nextSibling.innerHTML = currentLikes + " likes";
      }
    });
    var likeData = {
@@ -771,6 +824,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
  MealPrepSunday.prototype.unlikePublicRecipe = function(e) {
    e.preventDefault();
    var target = e.target.parentNode;
+   if ((!$(target).hasClass("public-recipe-unlike"))) return;
    var likes_div = target.parentNode;
    var num = target.id.substring(19);
    var key = target.parentNode.parentNode.id;

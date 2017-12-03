@@ -82,8 +82,17 @@ pre {
 .recipe_likes {
   position: absolute;
   right: 10px;
+  font-family: 'Roboto';
+  font-size: 14px;
+  color: rgba(0,0,0,.54);
 }
 
 .mdl-card__supporting-text table {
   white-space: normal;
+}
+
+.likes {
+  font-family: 'Roboto';
+  font-size: 14px;
+  color: rgba(0,0,0,.54);
 }
