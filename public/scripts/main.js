@@ -164,6 +164,8 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     $(document).on('click', '.add-grocery', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '.add-ingred', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '.import-recipe', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.recipe-add-to-day', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.recipe-add-to-grocery-list', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '#print-grocery-list', this.checkSignedInWithMessage.bind(this));
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
@@ -866,6 +868,7 @@ MealPrepSunday.RECIPE_TEMPLATE =
       '<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
       '<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
       '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
+      '<button class="recipe-add-to-day mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">today</i></button>' +
       '<button class="recipe-add-to-grocery-list mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">add_shopping_cart</i></button>' +
     '</div>';
 
