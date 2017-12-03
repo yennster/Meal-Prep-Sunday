@@ -416,7 +416,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
       for (var i = 0; i < ingredients.length; i++) {
         var newKey = recipeRef.push().key;
         var amount = ingredients[i].substr(0, ingredients[i].indexOf(' '));
-        console.log(ingredients[i].match(/\d+/g) == null );
         if (ingredients[i].match(/\d+/g) == null && !amount.includes("¾") && !amount.includes("½") && !amount.includes("¼") && !amount.includes("⅓")){
           var amount = 0;
           var units = "units";
@@ -472,6 +471,8 @@ MealPrepSunday.prototype.saveImport = function(e) {
             units = "tbsp";
           } else if (units.includes('lb') || units.includes('lbs') || units.includes('pound') || units.includes('Pound')) {
             units = "lbs";
+          } else if (units.includes('oz') || units.includes('ounce') || units.includes('Ounce')) {
+            units = "ounces";
           } else {
             name = units + " " + name;
             units = "units";
@@ -519,6 +520,12 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (name.indexOf("ripe") != -1) {
           name = name.replace("ripe",'');
         }
+        if (name.indexOf("squeezed") != -1) {
+          name = name.replace("squeezed",'');
+        }
+        if (name.indexOf("mashed") != -1) {
+          name = name.replace("mashed",'');
+        }
         if (name.indexOf("squeeze of") != -1) {
           name = name.replace("squeeze of",'');
         }
@@ -539,6 +546,10 @@ MealPrepSunday.prototype.saveImport = function(e) {
           var dashRecipe = name.substring(name.indexOf("-"));
           name = name.replace(dashRecipe,'');
         }**/
+        if (name.indexOf("for") != -1) {
+          var forRecipe = name.substring(name.indexOf("for"));
+          name = name.replace(forRecipe,'');
+        }
         if (name.indexOf("(") != -1) {
           if (name.indexOf(")") != -1) {
             var parentheses = name.substring(name.indexOf("(") - 1, name.indexOf(")") + 1);
