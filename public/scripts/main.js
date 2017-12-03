@@ -163,6 +163,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     $(document).on('click', '.create-recipe', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '.add-grocery', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '.add-ingred', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.import-recipe', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '#print-grocery-list', this.checkSignedInWithMessage.bind(this));
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
@@ -383,7 +384,7 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       this.createRecipeIngredientsNumAdded = 0;
-      console.log($(this.recipePublic).parent());
+      //console.log($(this.recipePublic).parent());
       $(this.recipePublic).parent().removeClass('is-checked');
       this.toggleButton();
     }.bind(this));
@@ -397,11 +398,11 @@ MealPrepSunday.prototype.saveImport = function(e) {
     var currentUser = this.auth.currentUser.uid;
     var recipe_link = this.importLink.value;
     var recipe_id = recipe_link.substring(31);
-    console.log(recipe_id);
+    //console.log(recipe_id);
     var yummly_id = "004619c4";
     var yummly_key = "86b46ce6f6b2e672f933aba75ff2de10";
     var url = "https://api.yummly.com/v1/api/recipe/" + recipe_id + "?_app_id=" + yummly_id + "&_app_key=" + yummly_key;
-    console.log(url);
+    //console.log(url);
     var database = this.database;
     var blah = this;
     fetch(url).then(function(response) {
@@ -434,7 +435,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
           name = units + " " + name;
           units = "units";
         }
-        console.log("name: " + name + ", amount: " + amount + ", units: " + units);
+        //console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         if (amount.includes("¾")) {
           var fracIndex = amount.indexOf("¾");
           var total = amount.substring(0, fracIndex);
@@ -474,7 +475,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
       var updates = {};
       var recipeKey = recipeRef.push().key;
       updates["/users/" + currentUser + "/recipes/" + recipeKey] = recipeData;
-      console.log(recipeData);
+      //console.log(recipeData);
       database.ref().update(updates).then(function() {
         MealPrepSunday.resetMaterialTextfield(document.getElementById('recipe_link'));
         blah.toggleButton();
@@ -829,7 +830,6 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      var recipeKey = val.recipe;
      var userID = val.user;
      var mps = this;
-     console.log(numPublicRecipes);
      this.database.ref("/users/" + userID + "/recipes/" + recipeKey).once('value').then(function(snapshot) {
         var rcp = snapshot.val();
         if (rcp == null) return;
@@ -864,7 +864,6 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    var ingrd = container.firstChild.nextSibling.nextSibling;
    ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
    ingrd.firstChild.setAttribute('id', "public_recipe_ingrds" + num);
-   console.log(ingrd);
    ingrd.setAttribute('style', "display:none;padding:0px;width:100%;");
    var sortedKeys = Object.keys(ingredients).sort();
    for (var i = 0; i < sortedKeys.length; i++) {
