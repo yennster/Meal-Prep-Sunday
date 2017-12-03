@@ -408,7 +408,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
       return response.json();
     }).then(function(data) {
       var ingredients = data.ingredientLines;
-      console.log(ingredients);
+      //console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
       var recipeRef = database.ref("/users/" + currentUser + "/recipes");
@@ -451,6 +451,9 @@ MealPrepSunday.prototype.saveImport = function(e) {
           var fracIndex = amount.indexOf("⅓");
           var total = amount.substring(0, fracIndex);
           amount = eval(total + ".33");
+        } else if (amount.match(/\d+/g) == null) {
+          name = amount + " " + name;
+          amount = 0;
         } else {
           amount = eval(amount);
         }
@@ -530,16 +533,18 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
   ingrd.firstChild.setAttribute('id', "recipe_ingrds" + num);
   ingrd.setAttribute('style', "display:none;padding:0px;width:100%;");
-  var sortedKeys = Object.keys(ingredients).sort();
-  for (var i = 0; i < sortedKeys.length; i++) {
-    var row = document.createElement('tr');
-    var ingred = ingredients[sortedKeys[i]];
-    row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
-    row.setAttribute('id', "recipe" + num + "_ingrd" + i);
-    row.firstChild.textContent = ingred.ingredient;
-    row.firstChild.nextSibling.textContent = ingred.amount;
-    row.firstChild.nextSibling.nextSibling.textContent = ingred.units;
-    ingrd.firstChild.firstChild.nextSibling.appendChild(row);
+  if (ingredients != null) {
+    var sortedKeys = Object.keys(ingredients).sort();
+    for (var i = 0; i < sortedKeys.length; i++) {
+      var row = document.createElement('tr');
+      var ingred = ingredients[sortedKeys[i]];
+      row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
+      row.setAttribute('id', "recipe" + num + "_ingrd" + i);
+      row.firstChild.textContent = ingred.ingredient;
+      row.firstChild.nextSibling.textContent = ingred.amount;
+      row.firstChild.nextSibling.nextSibling.textContent = ingred.units;
+      ingrd.firstChild.firstChild.nextSibling.appendChild(row);
+    }
   }
   var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   //btns.setAttribute('id', "recipe_edit" + num);
