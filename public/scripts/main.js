@@ -140,8 +140,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
       var today = new Date().toLocaleDateString("en-US");
       newWin.document.write("<body><h2>Meal Prep Sunday</h2><h5>Grocery List (" + today + ")</h5><table class='u-full-width'>");
       newWin.document.write(groceryTable.innerHTML);
-      newWin.document.write("</table><style>h2{font-family: 'Lobster';} th:nth-child(3){display:none;} td:nth-child(3){display:none;}" +
-                            "th:nth-child(4){display:none;} td:nth-child(4){display:none;}</style></body></html>");
+      newWin.document.write("</table><style>h2{font-family: 'Lobster';} th:nth-child(4){display:none;} td:nth-child(4){display:none;}</style></body></html>");
       newWin.document.close();
       newWin.focus();
       newWin.document.body.onload = function() {
