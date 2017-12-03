@@ -85,7 +85,5 @@ pre {
 }
 
 .mdl-card__supporting-text table {
-  /**overflow-x: scroll !important;
-  overflow: auto;**/
   white-space: normal;
 }
