@@ -71,10 +71,21 @@ pre {
   word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 
-.create-recipe-data {
-  overflow: visible !important;
+.cell-overflow {
+  overflow: visible;
 }
 
-.recipes {
+.zindex {
   z-index: auto !important;
+}
+
+.recipe_likes {
+  position: absolute;
+  right: 10px;
+}
+
+.mdl-card__supporting-text table {
+  /**overflow-x: scroll !important;
+  overflow: auto;**/
+  white-space: normal;
 }

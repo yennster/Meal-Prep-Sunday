@@ -79,11 +79,11 @@
                 Create new recipe
               </button>
             </div>
-            <div class="create-recipe-data mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp" id="add-recipe-div" style="display:none;">
+            <div class="cell-overflow mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp" id="add-recipe-div" style="display:none;">
                 <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                   <h2 class="mdl-card__title-text">Create new recipe</h2>
                 </div>
-                <div class="create-recipe-data mdl-card__supporting-text mdl-card--expand">
+                <div class="cell-overflow mdl-card__supporting-text mdl-card--expand">
                   <form id="recipe-form" action="#">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                       <input class="mdl-textfield__input" type="text" id="recipe_name">
@@ -125,11 +125,11 @@
                 <i class="material-icons">print</i>
               </button>
             </div>
-            <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp" id="add-grocery-div" style="display:none;">
+            <div class="cell-overflow mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp" id="add-grocery-div" style="display:none;">
                 <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                   <h2 class="mdl-card__title-text">Add grocery item</h2>
                 </div>
-                <div class="mdl-card__supporting-text">
+                <div class="cell-overflow mdl-card__supporting-text">
                   <form id="grocery-form" action="#">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
                       <input class="mdl-textfield__input" type="text" id="item">
@@ -139,6 +139,26 @@
                       <input class="mdl-textfield__input" step="any" type="number" id="item_amount">
                       <label class="mdl-textfield__label" for="item_amount">Amount</label>
                     </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">
+                        <input class="mdl-textfield__input" type="text" id="item_units" readonly>
+                        <label for="item_units">
+                            <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                        </label>
+                        <label for="item_units" class="mdl-textfield__label">Units</label>
+                        <ul for="item_units" class="mdl-menu mdl-menu--bottom-left mdl-js-menu flexdropdown">
+                            <li class="mdl-menu__item" data-val="units">units</li>
+                            <li class="mdl-menu__item" data-val="cups">cups</li>
+                            <li class="mdl-menu__item" data-val="tsp">tsp</li>
+                            <li class="mdl-menu__item" data-val="tbsp">tbsp</li>
+                            <li class="mdl-menu__item" data-val="ounces">ounces</li>
+                            <li class="mdl-menu__item" data-val="pints">pints</li>
+                            <li class="mdl-menu__item" data-val="gallons">gallons</li>
+                            <li class="mdl-menu__item" data-val="quarts">quarts</li>
+                            <li class="mdl-menu__item" data-val="liters">liters</li>
+                            <li class="mdl-menu__item" data-val="lbs">lbs</li>
+                            <li class="mdl-menu__item" data-val="grams">grams</li>
+                        </ul>
+                    </div>
                   </form>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
@@ -146,7 +166,7 @@
                 </div>
             </div>
 
-            <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+            <div class="zindex mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
                 <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                   <h2 class="mdl-card__title-text">Grocery List</h2>
                 </div>
@@ -156,6 +176,7 @@
                       <tr>
                         <th class="mdl-data-table__cell--non-numeric">Item</th>
                         <th class="mdl-data-table__cell--numeric">Amount</th>
+                        <th class="mdl-data-table__cell--non-numeric">Units</th>
                         <th class="mdl-data-table__cell">Edit/Remove</th>
                       </tr>
                     </thead>
@@ -175,11 +196,11 @@
                   Add ingredient
                 </button>
               </div>
-              <div class="mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp" id="add-ingredient-div" style="display:none;">
+              <div class="cell-overflow mdl-cell mdl-cell--6-col mdl-card mdl-shadow--6dp" id="add-ingredient-div" style="display:none;">
                   <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                     <h2 class="mdl-card__title-text">Add ingredient</h2>
                   </div>
-                  <div class="mdl-card__supporting-text">
+                  <div class="cell-overflow mdl-card__supporting-text">
                     <form id="inventory-form" action="#">
                       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
                         <input class="mdl-textfield__input" type="text" id="ingredient">
@@ -189,6 +210,26 @@
                         <input class="mdl-textfield__input" step="any" type="number" id="ingredient_amount">
                         <label class="mdl-textfield__label" for="ingredient_amount">Amount</label>
                       </div>
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">
+                          <input class="mdl-textfield__input" type="text" id="ingredient_units" readonly>
+                          <label for="ingredient_units">
+                              <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                          </label>
+                          <label for="ingredient_units" class="mdl-textfield__label">Units</label>
+                          <ul for="ingredient_units" class="mdl-menu mdl-menu--bottom-left mdl-js-menu flexdropdown">
+                              <li class="mdl-menu__item" data-val="units">units</li>
+                              <li class="mdl-menu__item" data-val="cups">cups</li>
+                              <li class="mdl-menu__item" data-val="tsp">tsp</li>
+                              <li class="mdl-menu__item" data-val="tbsp">tbsp</li>
+                              <li class="mdl-menu__item" data-val="ounces">ounces</li>
+                              <li class="mdl-menu__item" data-val="pints">pints</li>
+                              <li class="mdl-menu__item" data-val="gallons">gallons</li>
+                              <li class="mdl-menu__item" data-val="quarts">quarts</li>
+                              <li class="mdl-menu__item" data-val="liters">liters</li>
+                              <li class="mdl-menu__item" data-val="lbs">lbs</li>
+                              <li class="mdl-menu__item" data-val="grams">grams</li>
+                          </ul>
+                      </div>
                     </form>
                   </div>
                   <div class="mdl-card__actions mdl-card--border">
@@ -196,7 +237,7 @@
                   </div>
               </div>
 
-              <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+              <div class="zindex mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
                   <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
                     <h2 class="mdl-card__title-text">Inventory</h2>
                   </div>
@@ -206,6 +247,7 @@
                         <tr>
                           <th class="mdl-data-table__cell--non-numeric">Ingredient</th>
                           <th class="mdl-data-table__cell--numeric">Amount</th>
+                          <th class="mdl-data-table__cell--non-numeric">Units</th>
                           <th class="mdl-data-table__cell">Edit/Remove</th>
                         </tr>
                       </thead>

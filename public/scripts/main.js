@@ -17,6 +17,7 @@ function MealPrepSunday() {
   this.inventoryList = document.getElementById('inventory-list');
   this.ingredientInput = document.getElementById('ingredient');
   this.ingredientAmount = document.getElementById('ingredient_amount');
+  this.ingredientUnits = document.getElementById('ingredient_units');
   this.addIngredient = document.getElementById('add-ingredient');
 
   // ====================== Grocery List ======================
@@ -24,6 +25,7 @@ function MealPrepSunday() {
   this.groceryList = document.getElementById('grocery-list');
   this.itemInput = document.getElementById('item');
   this.itemAmount = document.getElementById('item_amount');
+  this.itemUnits = document.getElementById('item_units');
   this.addGroceryItem = document.getElementById('add-grocery-item');
 
   // ====================== Recipes ======================
@@ -190,9 +192,11 @@ MealPrepSunday.prototype.saveIngredient = function(e) {
     this.inventoryRef.push({
       ingredient: this.ingredientInput.value,
       amount: this.ingredientAmount.value,
+      units: this.ingredientUnits.value
     }).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.ingredientInput);
       MealPrepSunday.resetMaterialTextfield(this.ingredientAmount);
+      MealPrepSunday.resetMaterialTextfield(this.ingredientUnits);
       this.toggleButton();
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
@@ -207,7 +211,7 @@ MealPrepSunday.prototype.loadInventory = function() {
   var numIngredients = 0;
   var setIngredient = function(data) {
     var val = data.val();
-    this.displayInventory(data.key, val.ingredient, val.amount, numIngredients);
+    this.displayInventory(data.key, val.ingredient, val.amount, val.units, numIngredients);
     numIngredients++;
   }.bind(this);
   this.inventoryRef.on('child_added', setIngredient);
@@ -263,7 +267,7 @@ MealPrepSunday.prototype.removeIngredient = function(e) {
   this.inventoryRef.child(key).remove();
 };
 
-MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, num) {
+MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, units, num) {
   var container = document.createElement('tr');
   container.innerHTML = MealPrepSunday.INGREDIENT_TEMPLATE;
   container.setAttribute('id', key);
@@ -273,11 +277,14 @@ MealPrepSunday.prototype.displayInventory = function(key, ingredient, amount, nu
   var td2 = container.firstChild.nextSibling;
   td2.setAttribute('id', "amount" + num);
   td2.textContent = amount;
-  var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
+  var td3a = container.firstChild.nextSibling.nextSibling;
+  td3a.setAttribute('id', "units" + num);
+  td3a.textContent = units;
+  var td3 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   td3.setAttribute('id', "edit" + num);
-  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+  td3 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
   td3.setAttribute('id', "save" + num);
-  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+  td3 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
   td3.setAttribute('id', "remove" + num);
   this.inventoryList.appendChild(container);
 };
@@ -286,6 +293,7 @@ MealPrepSunday.INGREDIENT_TEMPLATE =
     '<tr>' +
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
         '<button class="inventory-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
         '<button class="inventory-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
@@ -378,7 +386,7 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   var container = document.createElement('div');
   container.innerHTML = MealPrepSunday.RECIPE_TEMPLATE;
   container.setAttribute('id', key);
-  container.className += "recipes mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+  container.className += "zindex mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
   var title = container.firstChild.firstChild;
   title.setAttribute('id', "recipe_name" + num);
   title.textContent = name;
@@ -399,14 +407,25 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
     row.firstChild.nextSibling.nextSibling.textContent = ingred.units;
     ingrd.firstChild.firstChild.nextSibling.appendChild(row);
   }
+  /**
   var publicData = container.firstChild.nextSibling.nextSibling.nextSibling;
   publicData.innerHTML =
     '<span id="' + "recipe_public" + num + '">Public: ' + pub + '</span>' + ", " +
     '<span id="' + "recipe_likes" + num + '">Likes: ' + likes + '</span>';
-  var btns = container.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.firstChild;
+    **/
+  var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   btns.setAttribute('id', "recipe_edit" + num);
   btns.nextSibling.setAttribute('id', "recipe_save" + num);
   btns.nextSibling.nextSibling.setAttribute('id', "recipe_remove" + num);
+  var likesHeart =
+    '<span class="recipe_likes"><button disabled class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">' +
+      '<i class="material-icons">favorite</i></button>';
+  if (likes == 1) {
+    likesHeart += likes + ' like</span>';
+  } else {
+    likesHeart += likes + ' likes</span>';
+  }
+  btns.nextSibling.nextSibling.outerHTML += likesHeart;
   this.recipeList.appendChild(container);
 };
 
@@ -481,6 +500,7 @@ MealPrepSunday.RECIPE_ADD_INGRED_TEMPLATE =
               '<li class="mdl-menu__item" data-val="quarts">quarts</li>' +
               '<li class="mdl-menu__item" data-val="liters">liters</li>' +
               '<li class="mdl-menu__item" data-val="lbs">lbs</li>' +
+              '<li class="mdl-menu__item" data-val="grams">grams</li>' +
           '</ul></div><hr>';
 
 MealPrepSunday.RECIPE_TEMPLATE =
@@ -491,9 +511,7 @@ MealPrepSunday.RECIPE_TEMPLATE =
     '</div>' +
     '<div class="recipe-ingrd-data mdl-card__supporting-text" style="padding:0;width:100%;">' +
     '</div>' +
-    '<div class="recipe-public mdl-card__supporting-text">' +
-    '</div>' +
-    '<div class="mdl-card__actions mdl-card--border">' +
+    '<div class="mdl-card__actions mdl-card--border" style="width:100%">' +
       '<button class="recipe-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
       '<button class="recipe-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
       '<button class="recipe-remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button>' +
@@ -529,9 +547,11 @@ MealPrepSunday.prototype.saveItem = function(e) {
     this.groceryRef.push({
       item: this.itemInput.value,
       amount: this.itemAmount.value,
+      units: this.itemUnits.value
     }).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.itemInput);
       MealPrepSunday.resetMaterialTextfield(this.itemAmount);
+      MealPrepSunday.resetMaterialTextfield(this.itemUnits);
       this.toggleButton();
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
@@ -546,7 +566,7 @@ MealPrepSunday.prototype.loadGroceryList = function() {
   var numItems = 0;
   var setItem = function(data) {
     var val = data.val();
-    this.displayGroceryList(data.key, val.item, val.amount, numItems);
+    this.displayGroceryList(data.key, val.item, val.amount, val.units, numItems);
     numItems++;
   }.bind(this);
   this.groceryRef.on('child_added', setItem);
@@ -601,7 +621,7 @@ MealPrepSunday.prototype.removeItem = function(e) {
   this.groceryRef.child(key).remove();
 };
 
-MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, num) {
+MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, units, num) {
   var container = document.createElement('tr');
   container.innerHTML = MealPrepSunday.GROCERY_LIST_TEMPLATE;
   container.setAttribute('id', key);
@@ -611,11 +631,14 @@ MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, num) {
   var td2 = container.firstChild.nextSibling;
   td2.setAttribute('id', "item_amount" + num);
   td2.textContent = amount;
-  var td3 = container.firstChild.nextSibling.nextSibling.firstChild;
+  var td3a = container.firstChild.nextSibling.nextSibling;
+  td3a.setAttribute('id', "item_units" + num);
+  td3a.textContent = units;
+  var td3 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   td3.setAttribute('id', "item_edit" + num);
-  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+  td3 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
   td3.setAttribute('id', "item_save" + num);
-  td3 = container.firstChild.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+  td3 = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
   td3.setAttribute('id', "item_remove" + num);
   this.groceryList.appendChild(container);
 };
@@ -624,6 +647,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
     '<tr>' +
       '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell--numeric"></td>' +
+      '<td class="mdl-data-table__cell--non-numeric"></td>' +
       '<td class="mdl-data-table__cell">' +
         '<button class="grocery-edit mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">edit</i></button>' +
         '<button class="grocery-submit mdl-button mdl-js-button mdl-button--icon mdl-button--accent" type="submit" style="display:none;"><i class="material-icons">save</i></button>' +
