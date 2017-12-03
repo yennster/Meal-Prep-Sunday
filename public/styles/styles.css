@@ -50,6 +50,7 @@ html, body {
 
 .none { display: none; }
 
+/**
 .flexdropdown {
     -webkit-padding-start: 0px;
     -webkit-margin-before: 0px;
@@ -58,10 +59,10 @@ html, body {
     margin-right: auto;
     margin-bottom: 0px;
     margin-left: auto;
-    /*width:90%;*/
-    position: relative; /* <-- Added */
-    z-index: 9999 !important; /* <-- Added */
+    position: relative;
+    z-index: 9999 !important;
 }
+**/
 
 pre {
   white-space: pre-wrap;       /* css-3 */
@@ -87,8 +88,13 @@ pre {
   color: rgba(0,0,0,.54);
 }
 
-.mdl-card__supporting-text table {
+.mdl-card__supporting-text > table {
   white-space: normal;
+}
+
+.just-table {
+  table-layout: fixed;
+  width: 100%;
 }
 
 .likes {
