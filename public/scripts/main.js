@@ -400,7 +400,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
     console.log(recipe_id);
     var yummly_id = "004619c4";
     var yummly_key = "86b46ce6f6b2e672f933aba75ff2de10";
-    var url = "http://api.yummly.com/v1/api/recipe/" + recipe_id + "?_app_id=" + yummly_id + "&_app_key=" + yummly_key;
+    var url = "https://api.yummly.com/v1/api/recipe/" + recipe_id + "?_app_id=" + yummly_id + "&_app_key=" + yummly_key;
     console.log(url);
     var database = this.database;
     var blah = this;
@@ -408,6 +408,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
       return response.json();
     }).then(function(data) {
       var ingredients = data.ingredientLines;
+      console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
       var recipeRef = database.ref("/users/" + currentUser + "/recipes");
@@ -416,29 +417,40 @@ MealPrepSunday.prototype.saveImport = function(e) {
         var amount = ingredients[i].substr(0, ingredients[i].indexOf(' '));
         var units1 = ingredients[i].substr(ingredients[i].indexOf(' ') + 1);
         var units = ingredients[i].substr(amount.length + 1, units1.indexOf(' '));
-        var name = ingredients[i].substr(units.length + amount.length + 2);
-        var substrings = ["cup*", "teaspoon*", "tablespoon*"];
-        if (new RegExp(substrings.join("|")).test(units)) {
-          if (units.includes('cup')) {
-            units = "cups";
-          } else if (units.includes('teaspoon')) {
-            units = "tsp";
-          } else if (units.includes('tablespoon')) {
-            units = "tbsp";
-          }
+        if (units.includes("heaping")) {
+          units = ingredients[i].substr(units.length + amount.length + 2);
+        }
+        var name = ingredients[i].substr(units.length + amount.length + 1);
+        if (amount.includes("-")) {
+          amount = amount.substr(amount.indexOf('-') + 1);
+        }
+        if (units.includes('cup') || units.includes('Cup')) {
+          units = "cups";
+        } else if (units.includes('teaspoon') || units.includes('Teaspoon')) {
+          units = "tsp";
+        } else if (units.includes('tablespoon') || units.includes('Tablespoon')) {
+          units = "tbsp";
         } else {
           name = units + " " + name;
           units = "units";
         }
-        console.log(name);
-        console.log(amount);
-        console.log(units);
-        if (amount == "¾") {
-          amount = 0.75;
-        } else if (amount == "½") {
-          amount = 0.5;
-        } else if (amount == "¼") {
-          amount = 0.25;
+        console.log("name: " + name + ", amount: " + amount + ", units: " + units);
+        if (amount.includes("¾")) {
+          var fracIndex = amount.indexOf("¾");
+          var total = amount.substring(0, fracIndex);
+          amount = eval(total + ".75");
+        } else if (amount.includes("½")) {
+          var fracIndex = amount.indexOf("½");
+          var total = amount.substring(0, fracIndex);
+          amount = eval(total + ".5");
+        } else if (amount.includes("¼")) {
+          var fracIndex = amount.indexOf("¼");
+          var total = amount.substring(0, fracIndex);
+          amount = eval(total + ".25");
+        } else if (amount.includes("⅓")) {
+          var fracIndex = amount.indexOf("⅓");
+          var total = amount.substring(0, fracIndex);
+          amount = eval(total + ".33");
         } else {
           amount = eval(amount);
         }
