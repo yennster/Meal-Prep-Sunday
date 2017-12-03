@@ -422,9 +422,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (units.includes("heaping")) {
           units = ingredients[i].substr(units.length + amount.length + 2);
         }
-        console.log(name);
-        console.log(amount);
-        console.log(units);
         if (units.match(/\d+/g)) {
           units = amount + " " + units;
           var index = units.indexOf("/");
@@ -432,7 +429,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
           units = units.substring(index + 2);
         }
         amount = amount.toString();
-        console.log(amount);
         if (amount.indexOf("-") != -1) {
           amount = amount.substr(amount.indexOf('-') + 1);
         }
@@ -468,7 +464,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
           name = units + " " + name;
           units = "units";
         }
-        console.log("name: " + name + ", amount: " + amount + ", units: " + units);
+        //console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         var ingred = {
           ingredient : name,
           amount : amount,
