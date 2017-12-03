@@ -338,10 +338,6 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       this.createRecipeIngredientsNumAdded = 0;
-      /**
-      for (var i = 0; i < num_ingreds; i++) {
-        document.getElementById("recipe-ingredients" + i).outerHTML = "";
-      } **/
       console.log($(this.recipePublic).parent());
       $(this.recipePublic).parent().removeClass('is-checked');
       this.toggleButton();
