@@ -31,9 +31,11 @@ function MealPrepSunday() {
   this.recipeList = document.getElementById('recipe-list');
   this.recipeName = document.getElementById('recipe_name');
   this.recipeInput = document.getElementById('recipe');
-  this.recipeIngredient = document.getElementById('recipe_ingredient');
-  this.recipeIngredientAmt = document.getElementById('recipe_ingredient_amount');
-  this.recipeIngredientUnits = document.getElementById('recipe_ingredient_units');
+  this.recipeIngredient = document.getElementById('recipe_ingredient0');
+  this.recipeIngredientAmt = document.getElementById('recipe_ingredient_amount0');
+  this.recipeIngredientUnits = document.getElementById('recipe_ingredient_units0');
+  this.createRecipeIngredients = document.getElementById('recipe-ingredients');
+  this.createRecipeIngredientsNumAdded = 0;
   this.addRecipe = document.getElementById('add-recipe');
   this.recipePublic = document.getElementById('recipe-public');
 
@@ -119,8 +121,10 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     $(document).on('click', '.grocery-edit', this.editItem.bind(this));
     $(document).on('click', '.grocery-remove', this.removeItem.bind(this));
 
-    //$(document).on('click', '.recipe-edit', this.editRecipe.bind(this));
+    $(document).on('click', '.recipe_add_ingredient', this.recipeAddIngredient.bind(this));
+    $(document).on('click', '.recipe-edit', this.editRecipe.bind(this));
     $(document).on('click', '.recipe-remove', this.removeRecipe.bind(this));
+
     $(document).on('click', '.public-recipe-like', this.likePublicRecipe.bind(this));
     $(document).on('click', '.public-recipe-unlike', this.unlikePublicRecipe.bind(this));
 
@@ -295,18 +299,27 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
   if (this.recipeInput.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
     this.recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
+    var num_ingreds = document.getElementById("recipe-ingredients").childElementCount;
+    var ingredUpdates = {};
+    for (var i = 0; i < num_ingreds; i++) {
+      var newIngredRef = this.recipeRef.push();
+      var newKey = newIngredRef.key;
+      var recipeData = {
+        ingredient: document.getElementById("recipe_ingredient" + i).value,
+        amount: document.getElementById("recipe_ingredient_amount" + i).value,
+        units: document.getElementById("recipe_ingredient_units" + i).value
+      }
+      ingredUpdates[newKey] = recipeData;
+    }
     var recipeKey = this.recipeRef.push().key;
+    var updates = {};
     var recipeData = {
       name: this.recipeName.value,
       recipe: this.recipeInput.value,
-      ingredient: this.recipeIngredient.value,
-      amount: this.recipeIngredientAmt.value,
-      units: this.recipeIngredientUnits.value,
+      ingredients: ingredUpdates,
       public: $(this.recipePublic).is(":checked"),
       likes: 0
     }
-    var updates = {};
-
     if ($(this.recipePublic).is(":checked")) {
       var time = 0 - (Date.now());
       var publicData = {
@@ -317,17 +330,22 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       updates['/public-recipes/' + recipeKey] = publicData;
     }
     updates["/users/" + currentUser + "/recipes/" + recipeKey] = recipeData;
+    for (var i = 0; i < num_ingreds; i++) {
+      document.getElementById("recipe-ingredients" + i).outerHTML = "";
+      this.createRecipeIngredientsNumAdded = 0;
+    }
     this.database.ref().update(updates).then(function() {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
-      MealPrepSunday.resetMaterialTextfield(this.recipeIngredient);
-      MealPrepSunday.resetMaterialTextfield(this.recipeIngredientAmt);
-      MealPrepSunday.resetMaterialTextfield(this.recipeIngredientUnits);
+      this.createRecipeIngredientsNumAdded = 0;
+      /**
+      for (var i = 0; i < num_ingreds; i++) {
+        document.getElementById("recipe-ingredients" + i).outerHTML = "";
+      } **/
+      console.log($(this.recipePublic).parent());
       $(this.recipePublic).parent().removeClass('is-checked');
       this.toggleButton();
-    }.bind(this)).catch(function(error) {
-      console.error('Error writing new message to Firebase Database', error);
-    });
+    }.bind(this));
   }
 };
 
@@ -350,17 +368,18 @@ MealPrepSunday.prototype.loadRecipes = function() {
   var numRecipes = 0;
   var setRecipe = function(data) {
     var val = data.val();
-    this.displayRecipes(data.key, val.name, val.recipe, val.ingredient, val.amount, val.units, val.public, val.likes, numRecipes);
+    if (val == null) return;
+    this.displayRecipes(data.key, val.name, val.recipe, val.ingredients, val.public, val.likes, numRecipes);
     numRecipes++;
   }.bind(this);
   this.recipeRef.on('child_added', setRecipe);
 };
 
-MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredients, amounts, units, pub, likes, num) {
+MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredients, pub, likes, num) {
   var container = document.createElement('div');
   container.innerHTML = MealPrepSunday.RECIPE_TEMPLATE;
   container.setAttribute('id', key);
-  container.className += "mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+  container.className += "recipes mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
   var title = container.firstChild.firstChild;
   title.setAttribute('id', "recipe_name" + num);
   title.textContent = name;
@@ -370,13 +389,15 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   var ingrd = container.firstChild.nextSibling.nextSibling;
   ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
   ingrd.firstChild.setAttribute('id', "recipe_ingrds" + num);
-  for (var i = 0; i < 1; i++) {
+  var sortedKeys = Object.keys(ingredients).sort();
+  for (var i = 0; i < sortedKeys.length; i++) {
     var row = document.createElement('tr');
+    var ingred = ingredients[sortedKeys[i]];
     row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
     row.setAttribute('id', "recipe" + num + "_ingrd" + i);
-    row.firstChild.textContent = ingredients;
-    row.firstChild.nextSibling.textContent = amounts;
-    row.firstChild.nextSibling.nextSibling.textContent = units;
+    row.firstChild.textContent = ingred.ingredient;
+    row.firstChild.nextSibling.textContent = ingred.amount;
+    row.firstChild.nextSibling.nextSibling.textContent = ingred.units;
     ingrd.firstChild.firstChild.nextSibling.appendChild(row);
   }
   var publicData = container.firstChild.nextSibling.nextSibling.nextSibling;
@@ -390,11 +411,84 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   this.recipeList.appendChild(container);
 };
 
+MealPrepSunday.prototype.editRecipe = function(e) {
+  e.preventDefault();
+  var target = e.target.parentNode;
+  target.style.display = "none";
+  $('.recipe-edit').prop('disabled', true);
+  $('.recipe-remove').prop('disabled', true);
+  target.nextSibling.style.display = "inline";
+  var num = target.id.substring(11);
+  var key = target.parentNode.parentNode.id;
+  var recipe = document.getElementById("recipe_name" + num);
+  var recipe_name = recipe.textContent;
+  recipe.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
+                          + recipe_name + "' id='new_name" + num + "'>";
+  var steps = document.getElementById("recipe_data" + num);
+  var steps_data = steps.textContent;
+  steps.innerHTML = '<textarea class="mdl-textfield__input" type="text" rows="7"' +
+    'id="new_recipe_data' + num + '">';
+  $('#new_recipe_data' + num).val(steps_data);
+};
+
+MealPrepSunday.prototype.recipeAddIngredient = function(e) {
+  e.preventDefault();
+  var target = e.target.parentNode;
+  var ingredients = document.getElementById('recipe-ingredients');
+  var new_ingred = document.createElement('div');
+  new_ingred.innerHTML = MealPrepSunday.RECIPE_ADD_INGRED_TEMPLATE;
+  var ingred_num = this.createRecipeIngredientsNumAdded;
+  this.createRecipeIngredientsNumAdded += 1;
+  new_ingred.setAttribute('id', "recipe-ingredients" + ingred_num);
+  var ingred_name = new_ingred.firstChild.firstChild;
+  ingred_name.setAttribute('id', "recipe_ingredient" + ingred_num);
+  ingred_name.nextSibling.setAttribute('for', "recipe_ingredient" + ingred_num);
+  var ingred_amount = new_ingred.firstChild.nextSibling.firstChild;
+  ingred_amount.setAttribute('id', "recipe_ingredient_amount" + ingred_num);
+  ingred_amount.nextSibling.setAttribute('for', "recipe_ingredient_amount" + ingred_num);
+  var ingred_units = new_ingred.firstChild.nextSibling.nextSibling.firstChild;
+  ingred_units.setAttribute('id', "recipe_ingredient_units" + ingred_num);
+  ingred_units.nextSibling.setAttribute('for', "recipe_ingredient_units" + ingred_num);
+  ingred_units.nextSibling.nextSibling.setAttribute('for', "recipe_ingredient_units" + ingred_num);
+  ingred_units.nextSibling.nextSibling.nextSibling.setAttribute('for', "recipe_ingredient_units" + ingred_num);
+  this.createRecipeIngredients.appendChild(new_ingred);
+  componentHandler.upgradeDom();
+  getmdlSelect.init(".getmdl-select");
+};
+
+MealPrepSunday.RECIPE_ADD_INGRED_TEMPLATE =
+      '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">' +
+        '<input class="mdl-textfield__input" type="text" id="recipe_ingredient0">' +
+        '<label class="mdl-textfield__label" for="recipe_ingredient0">Ingredient</label>' +
+      '</div>' +
+      '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">' +
+        '<input class="mdl-textfield__input" step="any" type="number" id="recipe_ingredient_amount0">' +
+        '<label class="mdl-textfield__label" for="recipe_ingredient_amount0">Amount</label>' +
+      '</div>' +
+      '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">' +
+          '<input class="mdl-textfield__input" type="text" id="recipe_ingredient_units0" readonly>' +
+          '<label for="recipe_ingredient_units0">' +
+              '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
+          '</label>' +
+          '<label for="recipe_ingredient_units0" class="mdl-textfield__label">Units</label>' +
+          '<ul for="recipe_ingredient_units0" class="mdl-menu mdl-menu--bottom-left mdl-js-menu flexdropdown">' +
+              '<li class="mdl-menu__item" data-val="units">units</li>' +
+              '<li class="mdl-menu__item" data-val="cups">cups</li>' +
+              '<li class="mdl-menu__item" data-val="tsp">tsp</li>' +
+              '<li class="mdl-menu__item" data-val="tbsp">tbsp</li>' +
+              '<li class="mdl-menu__item" data-val="ounces">ounces</li>' +
+              '<li class="mdl-menu__item" data-val="pints">pints</li>' +
+              '<li class="mdl-menu__item" data-val="gallons">gallons</li>' +
+              '<li class="mdl-menu__item" data-val="quarts">quarts</li>' +
+              '<li class="mdl-menu__item" data-val="liters">liters</li>' +
+              '<li class="mdl-menu__item" data-val="lbs">lbs</li>' +
+          '</ul></div><hr>';
+
 MealPrepSunday.RECIPE_TEMPLATE =
     '<div class="mdl-card__title mdl-color--accent mdl-color-text--white">' +
       '<h2 class="mdl-card__title-text"></h2>' +
     '</div>' +
-    '<div class="recipe-data mdl-card__supporting-text">' +
+    '<div class="recipe-data mdl-card__supporting-text mdl-card--expand">' +
     '</div>' +
     '<div class="recipe-ingrd-data mdl-card__supporting-text" style="padding:0;width:100%;">' +
     '</div>' +
@@ -554,14 +648,14 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
         var rcp = snapshot.val();
         if (rcp == null) return;
         var key = snapshot.key;
-        mps.displayPublicRecipes(key, rcp.name, rcp.recipe, rcp.ingredient, rcp.amount, rcp.units, rcp.likes, numRecipes);
+        mps.displayPublicRecipes(key, rcp.name, rcp.recipe, rcp.ingredients, rcp.likes, numRecipes);
       });
       numRecipes++;
    }.bind(this);
    this.publicRef.on('child_added', setPublicRecipe);
  };
 
- MealPrepSunday.prototype.displayPublicRecipes = function(key, name, recipe, ingredients, amounts, units, likes, num) {
+ MealPrepSunday.prototype.displayPublicRecipes = function(key, name, recipe, ingredients, likes, num) {
    var container = document.createElement('div');
    container.innerHTML = MealPrepSunday.PUBLIC_RECIPE_TEMPLATE;
    container.setAttribute('id', key);
@@ -575,13 +669,15 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    var ingrd = container.firstChild.nextSibling.nextSibling;
    ingrd.innerHTML += MealPrepSunday.RECIPE_INGRDS_TEMPLATE;
    ingrd.firstChild.setAttribute('id', "public_recipe_ingrds" + num);
-   for (var i = 0; i < 1; i++) {
+   var sortedKeys = Object.keys(ingredients).sort();
+   for (var i = 0; i < sortedKeys.length; i++) {
      var row = document.createElement('tr');
+     var ingred = ingredients[sortedKeys[i]];
      row.innerHTML = MealPrepSunday.RECIPE_INGRDS_ROW_TEMPLATE;
-     row.setAttribute('id', "public_recipe" + num + "_ingrd" + i);
-     row.firstChild.textContent = ingredients;
-     row.firstChild.nextSibling.textContent = amounts;
-     row.firstChild.nextSibling.nextSibling.textContent = units;
+     row.setAttribute('id', "recipe" + num + "_ingrd" + i);
+     row.firstChild.textContent = ingred.ingredient;
+     row.firstChild.nextSibling.textContent = ingred.amount;
+     row.firstChild.nextSibling.nextSibling.textContent = ingred.units;
      ingrd.firstChild.firstChild.nextSibling.appendChild(row);
    }
    var likes_div = container.firstChild.nextSibling.nextSibling.nextSibling;
