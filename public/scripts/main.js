@@ -895,7 +895,7 @@ MealPrepSunday.prototype.recipeAddToPlanner = function(e) {
     name: recipe_name
   }
   var updates = {};
-  updates["/users/" + currentUser + "/day-planner/" + key] = plannerData;
+  updates["/users/" + currentUser + "/planner/" + key] = plannerData;
   this.database.ref().update(updates);
 };
 
@@ -903,40 +903,47 @@ MealPrepSunday.prototype.recipeRemoveFromPlanner = function(e) {
   e.preventDefault();
   var target = e.target.parentNode;
   if ((!$(target).hasClass("planner-remove"))) return;
-  console.log(target.parentNode);
+  var key = target.parentNode.parentNode.id;
   var num = target.id.substring(14);
-  var ingreds_table = document.getElementById("recipe_ingrds" + num);
-  var ingreds = ingreds_table.firstChild.nextSibling;
-  var num_rows = ingreds.childElementCount;
+  var grocery_list = document.getElementById("grocery-list");
+  var num_rows = grocery_list.childElementCount;
   var currentUser = this.auth.currentUser.uid;
-  var itemRef = this.database.ref("/users/" + currentUser + "/grocery-list");
-  var itemUpdates = {};
+  var updates = {};
   for (var i = 0; i < num_rows; i++) {
-    var new_key = itemRef.push().key;
-    var row = document.getElementById('recipe' + num + "_ingrd" + i);
-    var itm = row.firstChild.textContent;
-    var item_amt = row.firstChild.nextSibling.textContent;
-    var item_unt = row.firstChild.nextSibling.nextSibling.textContent;
-    itemUpdates[new_key] = {
-      item: itm,
-      amount: item_amt,
-      units: item_unt,
-      //recipe: key
+    var row = grocery_list.getElementsByTagName('tr')[i];
+    var row_id = row.id;
+    if (($(row).hasClass(key))) {
+      updates["/users/" + currentUser + "/grocery-list/" + row_id] = null;
     }
   }
-  /**
-  itemRef.update(itemUpdates);
-  var likeData = {
-    recipe: key
-  }
-  var updates = {};
-  updates["/users/" + currentUser + "/day-planner/" + key] = likeData;
-  this.database.ref().update(updates); **/
+  updates["/users/" + currentUser + "/planner/" + key] = null;
+  this.database.ref().update(updates).then(function() {
+    //console.log(document.getElementById("planner_remove" + num).parentNode.parentNode.outerHTML);
+    document.getElementById("planner_remove" + num).parentNode.parentNode.outerHTML = "";
+    for (var i = 0; i < num_rows; i++) {
+      var row = grocery_list.getElementsByTagName('tr')[i];
+      if (($(row).hasClass(key))) {
+        row.outerHTML = "";
+      }
+    }
+  }.bind(this)).catch(function(error) {
+    console.error('Error writing new message to Firebase Database', error);
+  });
 };
 
 MealPrepSunday.prototype.loadPlanner = function() {
   var currentUser = this.auth.currentUser.uid;
-  this.inventoryRef = this.database.ref("/users/" + currentUser + "/day-planner");
+  //.toLocaleDateString("en-US");
+  var date = new Date();
+  var now = date? new Date(date) : new Date();
+  now.setHours(0,0,0,0);
+  var monday = new Date(now);
+  monday.setDate(monday.getDate() - monday.getDay() + 1);
+  var sunday = new Date(now);
+  sunday.setDate(sunday.getDate() - sunday.getDay() + 7);
+  var space = '\u2004'
+  document.getElementById("planner-week-of").textContent = space + " (" + monday.toLocaleDateString() + " - " + sunday.toLocaleDateString() + ")";
+  this.inventoryRef = this.database.ref("/users/" + currentUser + "/planner");
   this.inventoryRef.off();
   var numRecipes = 0;
   var setPlannerRecipe = function(data) {
@@ -1061,7 +1068,7 @@ MealPrepSunday.prototype.loadGroceryList = function() {
   var numItems = 0;
   var setItem = function(data) {
     var val = data.val();
-    this.displayGroceryList(data.key, val.item, val.amount, val.units, numItems);
+    this.displayGroceryList(data.key, val.item, val.amount, val.units, val.recipe, numItems);
     numItems++;
   }.bind(this);
   this.groceryRef.on('child_added', setItem);
@@ -1144,10 +1151,13 @@ MealPrepSunday.prototype.removeItem = function(e) {
   this.groceryRef.child(key).remove();
 };
 
-MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, units, num) {
+MealPrepSunday.prototype.displayGroceryList = function(key, item, amount, units, recipe, num) {
   var container = document.createElement('tr');
   container.innerHTML = MealPrepSunday.GROCERY_LIST_TEMPLATE;
   container.setAttribute('id', key);
+  if (recipe) {
+    container.className += recipe;
+  }
   var td = container.firstChild;
   td.setAttribute('id', "item_name" + num);
   td.textContent = item;
