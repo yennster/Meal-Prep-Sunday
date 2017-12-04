@@ -405,6 +405,9 @@ MealPrepSunday.prototype.saveImport = function(e) {
     var currentUser = this.auth.currentUser.uid;
     var recipe_link = this.importLink.value;
     var recipe_id = recipe_link.substring(31);
+    if (!recipe_link.includes("#")) {
+      recipe_id = recipe_link.substring(30);
+    }
     //console.log(recipe_id);
     var yummly_id = "004619c4";
     var yummly_key = "86b46ce6f6b2e672f933aba75ff2de10";
