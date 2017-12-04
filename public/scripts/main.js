@@ -420,6 +420,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
     }).then(function(data) {
       var ingredients = data.ingredientLines;
       //console.log(ingredients);
+      //console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
       var recipeRef = database.ref("/users/" + currentUser + "/recipes");
@@ -871,7 +872,7 @@ MealPrepSunday.prototype.recipeAddToPlanner = function(e) {
   if ((!$(target).hasClass("recipe-add-to-planner"))) return;
   var key = target.parentNode.parentNode.id;
   var recipe_name = target.parentNode.parentNode.firstChild.firstChild.textContent;
-  console.log(recipe_name);
+  //console.log(recipe_name);
   var num = target.id.substring(10);
   var ingreds_table = document.getElementById("recipe_ingrds" + num);
   var ingreds = ingreds_table.firstChild.nextSibling;
@@ -1365,13 +1366,13 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Helper Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   */
 MealPrepSunday.prototype.toggleButton = function() {
-  if (this.ingredientInput.value || this.recipeInput.value || this.itemInput.value || this.importLink.value) {
-    this.addIngredient.removeAttribute('disabled');
+  if (this.recipeInput.value || this.itemInput.value || this.importLink.value) {
+    //this.addIngredient.removeAttribute('disabled');
     this.addRecipe.removeAttribute('disabled');
     this.addGroceryItem.removeAttribute('disabled');
     this.importRecipe.removeAttribute('disabled');
   } else {
-    this.addIngredient.setAttribute('disabled', 'true');
+    //this.addIngredient.setAttribute('disabled', 'true');
     this.addRecipe.setAttribute('disabled', 'true');
     this.addGroceryItem.setAttribute('disabled', 'true');
     this.importRecipe.setAttribute('disabled', 'true');
