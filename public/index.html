@@ -54,8 +54,9 @@
         <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
           <a href="#Home" class="mdl-layout__tab is-active">Home</a>
           <a href="#Recipes" class="mdl-layout__tab">Recipes</a>
+          <!--<a href="#Inventory" class="mdl-layout__tab">Inventory</a>-->
+          <a href="#Planner" class="mdl-layout__tab">Recipe Planner</a>
           <a href="#Grocery-List" class="mdl-layout__tab">Grocery List</a>
-          <a href="#Inventory" class="mdl-layout__tab">Inventory</a>
         </div>
       </header>
 
@@ -208,6 +209,7 @@
         </section>
 
         <!-- Inventory/Ingredients -->
+        <!--
         <section class="mdl-layout__tab-panel" id="Inventory">
             <div class="mdl-grid">
               <div class="mdl-cell mdl-cell--12-col">
@@ -271,6 +273,30 @@
                         </tr>
                       </thead>
                       <tbody id="inventory-list">
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
+            </div>
+        </section>
+        -->
+
+        <!-- Recipe Planner -->
+        <section class="mdl-layout__tab-panel" id="Planner">
+            <div class="mdl-grid">
+              <div class="cell-overflow zindex mdl-cell mdl-cell--12-col mdl-card mdl-shadow--6dp">
+                  <div class="mdl-card__title mdl-color--accent mdl-color-text--white">
+                    <h2 class="mdl-card__title-text">Recipe Planner</h2>
+                  </div>
+                  <div class="cell-overflow mdl-card__supporting-text" style="padding:0;width:100%;">
+                    <table class="just-table mdl-data-table mdl-js-data-table" style="width:100%;" id='planner-table'>
+                      <thead>
+                        <tr>
+                          <th class="mdl-data-table__cell--non-numeric">Recipe Name</th>
+                          <th class="mdl-data-table__cell">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="planner-list">
                       </tbody>
                     </table>
                   </div>
