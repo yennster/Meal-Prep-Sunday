@@ -132,6 +132,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     $(document).on('click', '.recipe_add_ingredient', this.recipeAddIngredient.bind(this));
     $(document).on('click', '.recipe-edit', this.editRecipe.bind(this));
     $(document).on('click', '.recipe-remove', this.removeRecipe.bind(this));
+    $(document).on('click', '.recipe-add-to-grocery-list', this.recipeAddToGrocery.bind(this));
 
     $(document).on('click', '.public-recipe-like', this.likePublicRecipe.bind(this));
     $(document).on('click', '.public-recipe-unlike', this.unlikePublicRecipe.bind(this));
@@ -672,6 +673,8 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   btns.setAttribute('id', "recipe_edit" + num);
   btns.nextSibling.setAttribute('id', "recipe_save" + num);
   btns.nextSibling.nextSibling.setAttribute('id', "recipe_remove" + num);
+  btns.nextSibling.nextSibling.nextSibling.setAttribute('id', "recipe_day" + num);
+  btns.nextSibling.nextSibling.nextSibling.nextSibling.setAttribute('id', "recipe_grocery" + num);
   var likesHeart =
     '<span class="recipe_likes"><button disabled class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">' +
       '<i class="material-icons">favorite</i></button>';
@@ -692,6 +695,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   $('.recipe-edit').prop('disabled', true);
   $('.recipe-remove').prop('disabled', true);
   $('.recipe-add-to-grocery-list').prop('disabled', true);
+  $('.recipe-add-to-day').prop('disabled', true);
   target.nextSibling.style.display = "inline";
   var num = target.id.substring(11);
   var key = target.parentNode.parentNode.id;
@@ -795,6 +799,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
          $('.recipe-edit').prop('disabled', false);
          $('.recipe-remove').prop('disabled', false);
          $('.recipe-add-to-grocery-list').prop('disabled', false);
+         $('.recipe-add-to-day').prop('disabled', false);
        }.bind(this)).catch(function(error) {
          console.error('Error writing new message to Firebase Database', error);
        });
@@ -825,6 +830,33 @@ MealPrepSunday.prototype.recipeAddIngredient = function(e) {
   this.createRecipeIngredients.appendChild(new_ingred);
   componentHandler.upgradeDom();
   getmdlSelect.init(".getmdl-select");
+};
+
+MealPrepSunday.prototype.recipeAddToGrocery = function(e) {
+  e.preventDefault();
+  var target = e.target.parentNode;
+  if ((!$(target).hasClass("recipe-add-to-grocery-list"))) return;
+  var num = target.id.substring(14);
+  var ingreds_table = document.getElementById("recipe_ingrds" + num);
+  var ingreds = ingreds_table.firstChild.nextSibling;
+  var num_rows = ingreds.childElementCount;
+  console.log(num_rows);
+  var currentUser = this.auth.currentUser.uid;
+  var itemRef = this.database.ref("/users/" + currentUser + "/grocery-list");
+  var itemUpdates = {};
+  for (var i = 0; i < num_rows; i++) {
+    var new_key = itemRef.push().key;
+    var row = document.getElementById('recipe' + num + "_ingrd" + i);
+    var itm = row.firstChild.textContent;
+    var item_amt = row.firstChild.nextSibling.textContent;
+    var item_unt = row.firstChild.nextSibling.nextSibling.textContent;
+    itemUpdates[new_key] = {
+      item: itm,
+      amount: item_amt,
+      units: item_unt
+    }
+  }
+  itemRef.update(itemUpdates);
 };
 
 MealPrepSunday.RECIPE_ADD_INGRED_TEMPLATE =
