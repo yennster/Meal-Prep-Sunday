@@ -139,7 +139,3 @@ pre {
   flex: 0 1 auto;
   margin-left: auto;
 }
-
-td {
-  text-transform: capitalize;
-}
