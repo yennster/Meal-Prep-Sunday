@@ -1486,7 +1486,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      image: img
    });
    var data = {
-     message: '"' + recipe_name + '" added to your recipes',
+     message: '"' + recipe_name + '" has been added to your recipes',
      timeout: 2000
    };
    this.plannerSnackbar.MaterialSnackbar.showSnackbar(data);
