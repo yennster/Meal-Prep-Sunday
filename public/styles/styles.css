@@ -117,3 +117,7 @@ pre {
 .edit-recipe-units {
   width: 100% !important;
 }
+
+.mdl-card__title-text {
+  width: 100% !important;
+}
