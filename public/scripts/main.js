@@ -1290,7 +1290,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Feed ~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
  MealPrepSunday.prototype.loadPublicRecipes = function() {
-   this.publicRef = this.database.ref("/public-recipes")//.orderByChild("time");.limitToLast(20);
+   this.publicRef = this.database.ref("/public-recipes").orderByChild("time");//.limitToLast(20);
    this.publicRef.off();
    var numPublicRecipes = 0;
    var setPublicRecipe = function(data) {
