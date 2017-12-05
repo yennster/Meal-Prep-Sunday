@@ -1432,7 +1432,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      var item_amt = row.firstChild.nextSibling.textContent;
      var item_unt = row.firstChild.nextSibling.nextSibling.textContent;
      itemUpdates[new_key] = {
-       item: itm,
+       ingredient: itm,
        amount: item_amt,
        units: item_unt,
        recipe: key
@@ -1448,7 +1448,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      image: img
    });
    var data = {
-     message: 'Recipe added to your recipes',
+     message: '"' + recipe_name + '" added to your recipes',
      timeout: 2000
    };
    this.plannerSnackbar.MaterialSnackbar.showSnackbar(data);
