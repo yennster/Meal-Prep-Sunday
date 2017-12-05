@@ -143,6 +143,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
 
     $(document).on('click', '.public-recipe-like', this.likePublicRecipe.bind(this));
     $(document).on('click', '.public-recipe-unlike', this.unlikePublicRecipe.bind(this));
+    $(document).on('click', '.public-recipe-add-to-recipes', this.publicRecipeAddToRecipes.bind(this));
 
     // Print grocery list function (on button click)
     $('#print-grocery-list').on('click',function(){
@@ -175,6 +176,7 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     $(document).on('click', '.recipe-add-to-planner', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '.recipe-add-to-grocery-list', this.checkSignedInWithMessage.bind(this));
     $(document).on('click', '#print-grocery-list', this.checkSignedInWithMessage.bind(this));
+    $(document).on('click', '.public-recipe-add-to-recipes', this.checkSignedInWithMessage.bind(this));
     // Hide user's profile and sign-out button.
     this.userName.setAttribute('hidden', 'true');
     this.userPic.setAttribute('hidden', 'true');
@@ -1316,18 +1318,18 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      var likesRef = this.database.ref("/users/" + currentUser + "/liked-recipes/" + key).on('value', function(snapshot) {
         var theyLikeThis = snapshot.val();
         if (theyLikeThis) {
-          likes_div.firstChild.outerHTML =
+          likes_div.firstChild.firstChild.outerHTML =
             '<button class="public-recipe-unlike mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
               '<i class="material-icons">favorite</i>' +
             '</button>';
         } else {
-          likes_div.firstChild.setAttribute('id', "public_recipe_likes" + num);
+          likes_div.firstChild.firstChild.setAttribute('id', "public_recipe_likes" + num);
         }
      });
    } else {
-     likes_div.firstChild.setAttribute('id', "public_recipe_likes" + num);
+     likes_div.firstChild.firstChild.setAttribute('id', "public_recipe_likes" + num);
    }
-   var current_likes = likes_div.firstChild.nextSibling;
+   var current_likes = likes_div.firstChild.firstChild.nextSibling;
    current_likes.setAttribute('id', "current_likes" + num);
    current_likes.setAttribute('class', "likes");
    if (likes == 1) {
@@ -1344,17 +1346,17 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    if ((!$(target).hasClass("public-recipe-like"))) return;
    var likes_div = target.parentNode;
    var num = target.id.substring(19);
-   var key = target.parentNode.parentNode.id;
-   target.outerHTML =
+   var key = target.parentNode.parentNode.parentNode.id;
+   target.firstChild.outerHTML =
    '<button class="public-recipe-unlike mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
      '<i class="material-icons">favorite</i>' +
    '</button>';
    var currentUser = this.auth.currentUser.uid;
    var recipeUser;
    var currentLikes;
-   var recipeRef = this.database.ref("/public-recipes/" + key);
+   var recipeRef = this.database.ref("/public-recipes/" + key + "/");
    recipeRef.on('value', function(snapshot) {
-      recipeUser = snapshot.val().user;
+     recipeUser = snapshot.val().user;
    });
    var likesRef = this.database.ref("/users/" + recipeUser + "/recipes/" + key);
    likesRef.once('value').then(function(snapshot) {
@@ -1380,30 +1382,76 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    if ((!$(target).hasClass("public-recipe-unlike"))) return;
    var likes_div = target.parentNode;
    var num = target.id.substring(19);
-   var key = target.parentNode.parentNode.id;
-   target.outerHTML = '<button class="public-recipe-like mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
+   var key = target.parentNode.parentNode.parentNode.id;
+   target.firstChild.outerHTML =
+   '<button class="public-recipe-unlike mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
      '<i class="material-icons">favorite_border</i>' +
    '</button>';
    var currentUser = this.auth.currentUser.uid;
    var recipeUser;
    var currentLikes;
-   var recipeRef = this.database.ref("/public-recipes/" + key);
+   var recipeRef = this.database.ref("/public-recipes/" + key + "/");
    recipeRef.on('value', function(snapshot) {
-      recipeUser = snapshot.val().user;
+     recipeUser = snapshot.val().user;
    });
    var likesRef = this.database.ref("/users/" + recipeUser + "/recipes/" + key);
    likesRef.once('value').then(function(snapshot) {
      currentLikes = snapshot.val().likes - 1;
      likesRef.update({ "likes" : currentLikes });
      if (currentLikes == 1) {
-       likes_div.firstChild.nextSibling.innerHTML = " " + currentLikes + " like";
+       likes_div.firstChild.nextSibling.innerHTML = currentLikes + " like";
      } else {
-       likes_div.firstChild.nextSibling.innerHTML = " " + currentLikes + " likes";
+       likes_div.firstChild.nextSibling.innerHTML = currentLikes + " likes";
      }
    });
    var updates = {};
    updates["/users/" + currentUser + "/liked-recipes/" + key] = null;
    this.database.ref().update(updates);
+ };
+
+ MealPrepSunday.prototype.publicRecipeAddToRecipes = function(e) {
+   e.preventDefault();
+   var target = e.target.parentNode;
+   if ((!$(target).hasClass("public-recipe-add-to-recipes"))) return;
+   var img = $(target.parentNode.parentNode.firstChild).css("background").replace(/.*\s?url\([\'\"]?/, '').replace(/[\'\"]?\).*/, '');
+   var key = target.parentNode.parentNode.id;
+   var new_recipe_key = this.database.ref().push().key;
+   var recipe_name = target.parentNode.parentNode.firstChild.firstChild.textContent;
+   var num = target.parentNode.parentNode.firstChild.firstChild.id.substring(18);
+   var recipe_steps =  document.getElementById("public_recipe_data" + num).firstChild.innerHTML;
+   var ingreds_table = document.getElementById("public_recipe_ingrds" + num);
+   var ingreds = ingreds_table.firstChild.nextSibling;
+   var num_rows = ingreds.childElementCount;
+   var currentUser = this.auth.currentUser.uid;
+   var itemUpdates = {};
+   var recipeRef = this.database.ref("/users/" + currentUser + "/recipes/");
+   for (var i = 0; i < num_rows; i++) {
+     var new_key = recipeRef.push().key;
+     var row = ingreds.getElementsByTagName('tr')[i];
+     var itm = row.firstChild.textContent;
+     var item_amt = row.firstChild.nextSibling.textContent;
+     var item_unt = row.firstChild.nextSibling.nextSibling.textContent;
+     itemUpdates[new_key] = {
+       item: itm,
+       amount: item_amt,
+       units: item_unt,
+       recipe: key
+     }
+   }
+   var currentUser = this.auth.currentUser.uid;
+   recipeRef.child(new_recipe_key).set({
+     name: recipe_name,
+     likes: 0,
+     public: false,
+     recipe: recipe_steps,
+     ingredients: itemUpdates,
+     image: img
+   });
+   var data = {
+     message: 'Recipe added to your recipes',
+     timeout: 2000
+   };
+   this.plannerSnackbar.MaterialSnackbar.showSnackbar(data);
  };
 
  MealPrepSunday.PUBLIC_RECIPE_TEMPLATE =
@@ -1414,11 +1462,14 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      '</div>' +
      '<div class="recipe-ingrd-data mdl-card__supporting-text" style="padding:0;width:100%;">' +
      '</div>' +
-     '<div class="mdl-card__actions mdl-card--border" style="margin: auto;text-align: center;">' +
-        '<button class="public-recipe-like mdl-button mdl-js-button mdl-button--icon mdl-button--colored">' +
+     '<div class="flexcontainer mdl-card__actions mdl-card--border" style="margin: auto;text-align: center;">' +
+        '<div class="itemcenter"><button class="public-recipe-like mdl-button mdl-js-button mdl-button--icon mdl-button--colored">' +
           '<i class="material-icons">favorite_border</i>' +
         '</button>' +
-        '<span></span>' +
+        '<span></span></div>' +
+        '<button class="itemright public-recipe-add-to-recipes mdl-button mdl-js-button mdl-button--icon mdl-button--colored">' +
+          '<i class="material-icons">add</i>' +
+        '</button>' +
      '</div>';
 
  /*

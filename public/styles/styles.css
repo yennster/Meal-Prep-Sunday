@@ -121,3 +121,21 @@ pre {
 .mdl-card__title-text {
   width: 100% !important;
 }
+
+.flexcontainer {
+      display: flex;
+      justify-content: flex-start;   /* adjustment */
+      position: relative;            /* new */
+    }
+
+.itemcenter {
+      flex: 0 1 auto;
+      position: absolute;             /* new */
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+.itemright {
+      flex: 0 1 auto;
+      margin-left: auto;              /* new */
+    }
