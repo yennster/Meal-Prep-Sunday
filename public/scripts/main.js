@@ -717,6 +717,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   var num = target.id.substring(11);
   var steps = document.getElementById("recipe_data" + num);
   var steps_data = steps.firstChild.innerHTML;
+  var currentUser = this.auth.currentUser.uid;
   target.style.display = "none";
   $('.recipe-edit').prop('disabled', true);
   $('.recipe-remove').prop('disabled', true);
@@ -724,8 +725,8 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   $('.recipe-add-to-planner').prop('disabled', true);
   target.nextSibling.style.display = "inline";
   var key = target.parentNode.parentNode.id;
-  $("#" + key).removeClass("mdl-cell--4-col");
-  $("#" + key).addClass("mdl-cell--12-col");
+  $(target.parentNode.parentNode).removeClass("mdl-cell--4-col");
+  $(target.parentNode.parentNode).addClass("mdl-cell--12-col");
   var recipe = document.getElementById("recipe_name" + num);
   var recipe_name = recipe.textContent;
   recipe.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
@@ -746,7 +747,22 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   div.firstChild.setAttribute('id', div_id);
   div.firstChild.setAttribute('value', img);
   div.firstChild.nextSibling.setAttribute('for', div_id);
+  var public_div = document.createElement("div");
+  public_div.className += "mdl-textfield";
+  public_div.innerHTML = MealPrepSunday.EDIT_RECIPE_PUBLIC;
+  var public_div_id = 'new_recipe' + num + "_public";
+  public_div.firstChild.setAttribute('for', public_div_id);
+  public_div.firstChild.firstChild.setAttribute('id', public_div_id);
+  var recipeRef = this.database.ref("/users/" + currentUser + "/recipes/" + key + "/");
+  recipeRef.once('value').then(function(snapshot) {
+     var data = snapshot.val();
+     var is_pub = data.public;
+     if (is_pub) {
+       public_div.firstChild.MaterialCheckbox.check();
+     }
+  });
   document.getElementById("recipe_data" + num).appendChild(div);
+  document.getElementById("recipe_data" + num).appendChild(public_div);
   for (var i = 0; i < num_rows; i++) {
     var row = document.getElementById("recipe" + num + "_ingrd" + i);
     var ingredient = row.firstChild;
@@ -787,10 +803,11 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   componentHandler.upgradeDom();
   getmdlSelect.init(".getmdl-select");
   var currentUser = this.auth.currentUser.uid;
-  var recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
   $(".new_recipe_remove").on('click', function(e) {
     e.target.parentNode.parentNode.parentNode.outerHTML = "";
   });
+  var recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
+  var db = this.database.ref();
   $("#recipe_save" + num).on('click', function(e) {
     if ((!$(e.target.parentNode).hasClass("recipe-submit"))) return;
     e.preventDefault();
@@ -817,22 +834,37 @@ MealPrepSunday.prototype.editRecipe = function(e) {
     var new_name = document.getElementById("new_name" + num).value;
     var new_recipe = document.getElementById('new_recipe_data' + num).value;
     var curlikes;
-    var pub;
+    var updates = {};
     recipeRef.child(key).once('value').then(function(snapshot) {
        var data = snapshot.val();
        curlikes = data.likes;
-       pub = data.public;
        var new_img = document.getElementById('new_recipe' + num + "_image").value;
+       var old_public = data.public;
+       var is_public = $(public_div.firstChild.firstChild).is(":checked");
+       if (is_public && (old_public == false)) {
+         var time = 0 - (Date.now());
+         var publicData = {
+           recipe: key,
+           user: currentUser,
+           time: time
+         }
+         updates['/public-recipes/' + key] = publicData;
+       } else if (old_public) {
+         if (is_public == false) {
+           updates['/public-recipes/' + key] = null;
+         }
+       }
+       db.update(updates);
        recipeRef.child(key).set({
          name: new_name,
          ingredients: ingredUpdates,
          recipe: new_recipe,
-         public: pub,
+         public: is_public,
          likes: curlikes,
          image: new_img
        }).then(function() {
-         $("#" + key).removeClass("mdl-cell--12-col");
-         $("#" + key).addClass("mdl-cell--4-col");
+         $(target.parentNode.parentNode).removeClass("mdl-cell--12-col");
+         $(target.parentNode.parentNode).addClass("mdl-cell--4-col");
          document.getElementById("recipe_name" + num).innerHTML = new_name;
          var rcp = document.getElementById("recipe_data" + num);
          rcp.innerHTML = "<pre>" + new_recipe + "</pre>";
@@ -846,6 +878,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
          $('#recipe_ingrds' + num).parent().hide();
          target.style.display = "inline";
          target.nextSibling.style.display = "none";
+         $(".new_recipe_remove").parent().remove();
          $('.recipe-edit').prop('disabled', false);
          $('.recipe-remove').prop('disabled', false);
          $('.recipe-add-to-grocery-list').prop('disabled', false);
@@ -856,6 +889,15 @@ MealPrepSunday.prototype.editRecipe = function(e) {
      });
   });
 };
+
+MealPrepSunday.EDIT_RECIPE_IMAGE =
+    '<input class="mdl-textfield__input" type="text">' +
+    '<label class="mdl-textfield__label">Image URL</label>';
+
+MealPrepSunday.EDIT_RECIPE_PUBLIC =
+'<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">' +
+'<input type="checkbox" class="mdl-checkbox__input">' +
+'<span class="mdl-checkbox__label">Make recipe public?</span></label>';
 
 MealPrepSunday.prototype.recipeAddIngredient = function(e) {
   e.preventDefault();
@@ -1021,10 +1063,6 @@ MealPrepSunday.prototype.displayPlanner = function(key, name, num) {
   td2.setAttribute('id', "planner_remove" + num);
   this.plannerList.appendChild(container);
 };
-
-MealPrepSunday.EDIT_RECIPE_IMAGE =
-    '<input class="mdl-textfield__input" type="text">' +
-    '<label class="mdl-textfield__label">Image URL</label>';
 
 MealPrepSunday.PLANNER_TEMPLATE =
     '<tr>' +
@@ -1347,7 +1385,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    var likes_div = target.parentNode;
    var num = target.id.substring(19);
    var key = target.parentNode.parentNode.parentNode.id;
-   target.firstChild.outerHTML =
+   target.firstChild.parentNode.outerHTML =
    '<button class="public-recipe-unlike mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
      '<i class="material-icons">favorite</i>' +
    '</button>';
@@ -1383,8 +1421,8 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    var likes_div = target.parentNode;
    var num = target.id.substring(19);
    var key = target.parentNode.parentNode.parentNode.id;
-   target.firstChild.outerHTML =
-   '<button class="public-recipe-unlike mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
+   target.firstChild.parentNode.outerHTML =
+   '<button class="public-recipe-like mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="public_recipe_likes' + num + '">' +
      '<i class="material-icons">favorite_border</i>' +
    '</button>';
    var currentUser = this.auth.currentUser.uid;

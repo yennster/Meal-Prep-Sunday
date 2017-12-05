@@ -123,19 +123,23 @@ pre {
 }
 
 .flexcontainer {
-      display: flex;
-      justify-content: flex-start;   /* adjustment */
-      position: relative;            /* new */
-    }
+  display: flex;
+  justify-content: flex-start;
+  position: relative;
+}
 
 .itemcenter {
-      flex: 0 1 auto;
-      position: absolute;             /* new */
-      left: 50%;
-      transform: translateX(-50%);
-    }
+  flex: 0 1 auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 .itemright {
-      flex: 0 1 auto;
-      margin-left: auto;              /* new */
-    }
+  flex: 0 1 auto;
+  margin-left: auto;
+}
+
+td {
+  text-transform: capitalize;
+}
