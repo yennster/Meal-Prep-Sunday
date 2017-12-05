@@ -32,6 +32,7 @@ function MealPrepSunday() {
   this.recipeForm = document.getElementById('recipe-form');
   this.recipeList = document.getElementById('recipe-list');
   this.recipeName = document.getElementById('recipe_name');
+  this.recipeImage = document.getElementById('recipe_image');
   this.recipeInput = document.getElementById('recipe');
   this.recipeIngredient = document.getElementById('recipe_ingredient0');
   this.recipeIngredientAmt = document.getElementById('recipe_ingredient_amount0');
@@ -44,6 +45,8 @@ function MealPrepSunday() {
   this.importLink = document.getElementById('recipe_link');
   this.importForm = document.getElementById('import-form');
   this.plannerList = document.getElementById('planner-list');
+  this.plannerSnackbar = document.getElementById('added-to-planner-snackbar');
+  this.grocerySnackbar = document.getElementById('added-to-planner-snackbar');
 
   // ====================== Button/Input Handlers ======================
   var buttonTogglingHandler = this.toggleButton.bind(this);
@@ -371,7 +374,8 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       recipe: this.recipeInput.value,
       ingredients: ingredUpdates,
       public: $(this.recipePublic).is(":checked"),
-      likes: 0
+      likes: 0,
+      image: this.recipeImage.value
     }
     if ($(this.recipePublic).is(":checked")) {
       var time = 0 - (Date.now());
@@ -418,8 +422,9 @@ MealPrepSunday.prototype.saveImport = function(e) {
     fetch(url).then(function(response) {
       return response.json();
     }).then(function(data) {
+      console.log(data);
+      var img = data.images[0].hostedLargeUrl;
       var ingredients = data.ingredientLines;
-      //console.log(ingredients);
       //console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
@@ -600,8 +605,10 @@ MealPrepSunday.prototype.saveImport = function(e) {
         recipe: "<a target='_blank' href='" + data.source.sourceRecipeUrl + "'>" + data.source.sourceRecipeUrl + "</a>",
         ingredients: ingredUpdates,
         public: false,
-        likes: 0
+        likes: 0,
+        image: img
       }
+      console.log(img);
       var updates = {};
       var recipeKey = recipeRef.push().key;
       updates["/users/" + currentUser + "/recipes/" + recipeKey] = recipeData;
@@ -624,6 +631,7 @@ MealPrepSunday.prototype.removeRecipe = function(e) {
   var updates = {};
   updates['/public-recipes/' + key] = null;
   updates["/users/" + currentUser + "/recipes/" + key] = null;
+  updates["/users/" + currentUser + "/planner/" + key] = null;
   this.database.ref().update(updates);
 };
 
@@ -635,17 +643,22 @@ MealPrepSunday.prototype.loadRecipes = function() {
   var setRecipe = function(data) {
     var val = data.val();
     if (val == null) return;
-    this.displayRecipes(data.key, val.name, val.recipe, val.ingredients, val.public, val.likes, numRecipes);
+    this.displayRecipes(data.key, val.name, val.recipe, val.ingredients, val.public, val.likes, val.image, numRecipes);
     numRecipes++;
   }.bind(this);
   this.recipeRef.on('child_added', setRecipe);
 };
 
-MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredients, pub, likes, num) {
+MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredients, pub, likes, image, num) {
   var container = document.createElement('div');
   container.innerHTML = MealPrepSunday.RECIPE_TEMPLATE;
   container.setAttribute('id', key);
   container.className += "cell-overflow zindex mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+  if (image) {
+    var title_bg = container.firstChild;
+    var bg = "background: linear-gradient(transparent, transparent, rgba(66,66,66,0.9)), url('" + image + "') bottom right no-repeat;height: 200px;background-size: 100%;";
+    title_bg.setAttribute("style", bg);
+  }
   var title = container.firstChild.firstChild;
   title.setAttribute('id', "recipe_name" + num);
   title.textContent = name;
@@ -864,6 +877,11 @@ MealPrepSunday.prototype.recipeAddToGrocery = function(e) {
     }
   }
   itemRef.update(itemUpdates);
+  var data = {
+    message: 'Recipe ingredients added to grocery list',
+    timeout: 2000
+  };
+  this.grocerySnackbar.MaterialSnackbar.showSnackbar(data);
 };
 
 MealPrepSunday.prototype.recipeAddToPlanner = function(e) {
@@ -901,6 +919,11 @@ MealPrepSunday.prototype.recipeAddToPlanner = function(e) {
   var updates = {};
   updates["/users/" + currentUser + "/planner/" + key] = plannerData;
   this.database.ref().update(updates);
+  var data = {
+    message: 'Recipe added to planner',
+    timeout: 2000
+  };
+  this.plannerSnackbar.MaterialSnackbar.showSnackbar(data);
 };
 
 MealPrepSunday.prototype.recipeRemoveFromPlanner = function(e) {
@@ -1209,18 +1232,23 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
         if (rcp == null) return;
         var key = snapshot.key;
         numPublicRecipes++;
-        mps.displayPublicRecipes(key, rcp.name, rcp.recipe, rcp.ingredients, rcp.likes, numPublicRecipes);
+        mps.displayPublicRecipes(key, rcp.name, rcp.recipe, rcp.ingredients, rcp.likes, rcp.image, numPublicRecipes);
 
       });
    }.bind(this);
    this.publicRef.on('child_added', setPublicRecipe);
  };
 
- MealPrepSunday.prototype.displayPublicRecipes = function(key, name, recipe, ingredients, likes, num) {
+ MealPrepSunday.prototype.displayPublicRecipes = function(key, name, recipe, ingredients, likes, image, num) {
    var container = document.createElement('div');
    container.innerHTML = MealPrepSunday.PUBLIC_RECIPE_TEMPLATE;
    container.setAttribute('id', key);
-   container.className += "mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+   container.className += "cell-overflow zindex mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
+   if (image) {
+     var title_bg = container.firstChild;
+     var bg = "background: linear-gradient(transparent, transparent, rgba(66,66,66,0.9)), url('" + image + "') bottom right no-repeat;height: 200px;background-size: 100%;";
+     title_bg.setAttribute("style", bg);
+   }
    var title = container.firstChild.firstChild;
    title.setAttribute('id', "public_recipe_name" + num);
    title.textContent = name;

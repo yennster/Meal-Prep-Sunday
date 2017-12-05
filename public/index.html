@@ -97,6 +97,10 @@
                       <textarea class="mdl-textfield__input" type="text" rows="7" id="recipe"></textarea>
                       <label class="mdl-textfield__label" for="recipe">Recipe</label>
                     </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width:100%;">
+                      <input class="mdl-textfield__input" type="text" id="recipe_image">
+                      <label class="mdl-textfield__label" for="recipe_image">Image URL</label>
+                    </div>
                     <div id="recipe-ingredients">
                     </div>
                     <button class="recipe_add_ingredient mdl-button mdl-js-button mdl-button--accent">
@@ -305,6 +309,11 @@
         </section>
 
         <div id="must-signin-snackbar" class="mdl-js-snackbar mdl-snackbar">
+          <div class="mdl-snackbar__text"></div>
+          <button class="mdl-snackbar__action" type="button"></button>
+        </div>
+
+        <div id="added-to-planner-snackbar" class="mdl-js-snackbar mdl-snackbar">
           <div class="mdl-snackbar__text"></div>
           <button class="mdl-snackbar__action" type="button"></button>
         </div>
