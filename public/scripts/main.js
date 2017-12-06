@@ -491,6 +491,8 @@ MealPrepSunday.prototype.saveImport = function(e) {
             units = "lbs";
           } else if (units.includes('oz') || units.includes('ounce') || units.includes('Ounce')) {
             units = "ounces";
+          } else if (units.includes('pt') || units.includes('pint') || units.includes('Pint')|| units.includes('pints')) {
+            units = "pints";
           } else {
             name = units + " " + name;
             units = "units";
@@ -502,8 +504,17 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (name.indexOf("divided") != -1) {
           name = name.replace("divided",'');
         }
+        if (name.indexOf("plus") != -1) {
+          name = name.replace("plus",'');
+        }
+        if (name.indexOf("more") != -1) {
+          name = name.replace("more",'');
+        }
         if (name.indexOf("thinly") != -1) {
           name = name.replace("thinly",'');
+        }
+        if (name.indexOf("freshly") != -1) {
+          name = name.replace("freshly",'');
         }
         if (name.indexOf("fresh") != -1) {
           name = name.replace("fresh",'');
@@ -522,6 +533,9 @@ MealPrepSunday.prototype.saveImport = function(e) {
         }
         if (name.indexOf("sliced") != -1) {
           name = name.replace("sliced",'');
+        }
+        if (name.indexOf("uncooked") != -1) {
+          name = name.replace("uncooked",'');
         }
         if (name.indexOf("cooked") != -1) {
           name = name.replace("cooked",'');
@@ -991,7 +1005,7 @@ MealPrepSunday.prototype.recipeAddToPlanner = function(e) {
   updates["/users/" + currentUser + "/planner/" + key] = plannerData;
   this.database.ref().update(updates);
   var data = {
-    message: 'Recipe added to planner',
+    message: '"' + recipe_name + '" added to planner',
     timeout: 2000
   };
   this.plannerSnackbar.MaterialSnackbar.showSnackbar(data);
@@ -1002,6 +1016,7 @@ MealPrepSunday.prototype.recipeRemoveFromPlanner = function(e) {
   var target = e.target.parentNode;
   if ((!$(target).hasClass("planner-remove"))) return;
   var key = target.parentNode.parentNode.id;
+  var recipe_name = target.parentNode.parentNode.firstChild.textContent;
   var num = target.id.substring(14);
   var grocery_list = document.getElementById("grocery-list");
   var num_rows = grocery_list.childElementCount;
@@ -1020,6 +1035,7 @@ MealPrepSunday.prototype.recipeRemoveFromPlanner = function(e) {
     document.getElementById("planner_remove" + num).parentNode.parentNode.outerHTML = "";
     for (var i = 0; i < num_rows; i++) {
       var row = grocery_list.getElementsByTagName('tr')[i];
+      console.log(row);
       if (($(row).hasClass(key))) {
         row.outerHTML = "";
       }
@@ -1027,6 +1043,11 @@ MealPrepSunday.prototype.recipeRemoveFromPlanner = function(e) {
   }.bind(this)).catch(function(error) {
     console.error('Error writing new message to Firebase Database', error);
   });
+  var data = {
+    message: '"' + recipe_name + '" removed from planner',
+    timeout: 2000
+  };
+  this.plannerSnackbar.MaterialSnackbar.showSnackbar(data);
 };
 
 MealPrepSunday.prototype.loadPlanner = function() {
