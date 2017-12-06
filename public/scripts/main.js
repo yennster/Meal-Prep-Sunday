@@ -573,6 +573,9 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (name.indexOf(" and ") != -1) {
           name = name.replace(" and ",' ');
         } **/
+        if (name.indexOf(" of ") != -1) {
+          name = name.replace(" of ",' ');
+        }
         if (name.indexOf("for") != -1) {
           var forRecipe = name.substring(name.indexOf("for"));
           name = name.replace(forRecipe,'');
