@@ -669,7 +669,7 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   container.className += "cell-overflow zindex mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
   if (image) {
     var title_bg = container.firstChild;
-    var bg = "background: linear-gradient(transparent, transparent, rgba(66,66,66,0.9)), url('" + image + "') bottom right no-repeat;height: 200px;background-size: 100%;";
+    var bg = "background: linear-gradient(transparent, transparent, rgba(66,66,66,0.9)), url('" + image + "') bottom right no-repeat;height: 200px;background-size: cover;";
     title_bg.setAttribute("style", bg);
   }
   var title = container.firstChild.firstChild;
@@ -1337,7 +1337,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    container.className += "cell-overflow zindex mdl-cell mdl-cell--4-col mdl-card mdl-shadow--6dp";
    if (image) {
      var title_bg = container.firstChild;
-     var bg = "background: linear-gradient(transparent, transparent, rgba(66,66,66,0.9)), url('" + image + "') bottom right no-repeat;height: 200px;background-size: 100%;";
+     var bg = "background: linear-gradient(transparent, transparent, rgba(66,66,66,0.9)), url('" + image + "') bottom right no-repeat;height: 200px;background-size: cover;";
      title_bg.setAttribute("style", bg);
    }
    var title = container.firstChild.firstChild;
