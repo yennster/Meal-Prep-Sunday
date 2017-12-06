@@ -566,9 +566,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
         }
         if (name.indexOf("A ") != -1) {
           name = name.replace("A ",'');
-        }
-        if (name.indexOf("and") != -1) {
-          name = name.replace("and",'');
         }/**
         if (name.indexOf("or") != -1) {
           var orRecipe = name.substring(name.indexOf("or"));
@@ -818,6 +815,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   getmdlSelect.init(".getmdl-select");
   var currentUser = this.auth.currentUser.uid;
   $(".new_recipe_remove").on('click', function(e) {
+    if ((!$(e.target.parentNode).hasClass("new_recipe_remove"))) return;
     e.target.parentNode.parentNode.parentNode.outerHTML = "";
   });
   var recipeRef = this.database.ref("/users/" + currentUser + "/recipes");

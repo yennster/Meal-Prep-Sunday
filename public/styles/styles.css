@@ -139,3 +139,11 @@ pre {
   flex: 0 1 auto;
   margin-left: auto;
 }
+
+td:nth-child(1) {
+  text-transform: capitalize;
+}
+
+td:nth-child(2) {
+  text-transform: capitalize;
+}
