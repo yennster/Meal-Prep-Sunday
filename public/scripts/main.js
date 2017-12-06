@@ -941,6 +941,7 @@ MealPrepSunday.prototype.recipeAddToGrocery = function(e) {
   e.preventDefault();
   var target = e.target.parentNode;
   if ((!$(target).hasClass("recipe-add-to-grocery-list"))) return;
+  var recipe_name = target.parentNode.parentNode.firstChild.firstChild.textContent;
   var num = target.id.substring(14);
   var ingreds_table = document.getElementById("recipe_ingrds" + num);
   var ingreds = ingreds_table.firstChild.nextSibling;
@@ -962,7 +963,7 @@ MealPrepSunday.prototype.recipeAddToGrocery = function(e) {
   }
   itemRef.update(itemUpdates);
   var data = {
-    message: 'Ingredients added to grocery list',
+    message: '"' + recipe_name + '" ingredients added to grocery list',
     timeout: 2000
   };
   this.grocerySnackbar.MaterialSnackbar.showSnackbar(data);
