@@ -567,14 +567,12 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (name.indexOf("A ") != -1) {
           name = name.replace("A ",'');
         }/**
-        if (name.indexOf("or") != -1) {
-          var orRecipe = name.substring(name.indexOf("or"));
-          name = name.replace(orRecipe,'');
+        if (name.indexOf(" or ") != -1) {
+          name = name.replace(" or ",' ');
         }
-        if (name.indexOf("-") != -1) {
-          var dashRecipe = name.substring(name.indexOf("-"));
-          name = name.replace(dashRecipe,'');
-        }**/
+        if (name.indexOf(" and ") != -1) {
+          name = name.replace(" and ",' ');
+        } **/
         if (name.indexOf("for") != -1) {
           var forRecipe = name.substring(name.indexOf("for"));
           name = name.replace(forRecipe,'');
