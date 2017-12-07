@@ -503,7 +503,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
                      "frozen", "shredded", " very ", "ripe", "squeezed", "mashed", "squeeze of",
                      "pinch of", "A ", " of ", " for ", "Club House"]; //" or ", " and "
         for (var j = 0; j < words.length; j++) {
-          console.log(words[j]);
           if (name.indexOf(words[j]) != -1) {
             name = name.replace(words[j],'');
           }
@@ -693,7 +692,6 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   recipeRef.once('value').then(function(snapshot) {
      var data = snapshot.val();
      var is_pub = data.public;
-     console.log(is_pub);
      if (is_pub) {
        public_div.firstChild.MaterialCheckbox.check();
      }
@@ -960,7 +958,6 @@ MealPrepSunday.prototype.recipeRemoveFromPlanner = function(e) {
     document.getElementById("planner_remove" + num).parentNode.parentNode.outerHTML = "";
     for (var i = 0; i < num_rows; i++) {
       var row = grocery_list.getElementsByTagName('tr')[i];
-      console.log(row);
       if (($(row).hasClass(key))) {
         row.outerHTML = "";
       }
