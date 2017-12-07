@@ -149,11 +149,10 @@ MealPrepSunday.prototype.onAuthStateChanged = function(user) {
     $('#print-grocery-list').on('click',function(){
       var groceryTable = document.getElementById("grocery-table");
       var newWin = window.open("");
-      newWin.document.write("<html><head><title>Meal Prep Sunday - Grocery List</title>")
-      newWin.document.write("<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>");
-      newWin.document.write("<link rel='stylesheet' href='//fonts.googleapis.com/css?family=Lobster|Roboto'></head>");
       var today = new Date().toLocaleDateString("en-US");
-      newWin.document.write("<body><h2>Meal Prep Sunday</h2><h5>Grocery List (" + today + ")</h5><table class='u-full-width'>");
+      newWin.document.write("<html><head><title>Meal Prep Sunday - Grocery List (" + today + ")</title>")
+      newWin.document.write("<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>");
+      newWin.document.write("<body><img src='images/MealPrepSunday-Logo.png' width='295'><h5>Grocery List (" + today + ")</h5><table class='u-full-width'>");
       newWin.document.write(groceryTable.innerHTML);
       newWin.document.write("</table><style>h2{font-family: 'Lobster';} th:nth-child(4){display:none;} td:nth-child(4){display:none;}</style></body></html>");
       newWin.document.close();
