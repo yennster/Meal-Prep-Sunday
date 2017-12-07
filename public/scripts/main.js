@@ -870,7 +870,8 @@ MealPrepSunday.prototype.editRecipe = function(e) {
          target.style.display = "inline";
          target.nextSibling.style.display = "none";
          $(".new_recipe_remove").parent().remove();
-         $(".edit_recipe_add").parent().move();
+         $(".added_ingred_remove").parent().remove();
+         $("#edit_recipe_add_ingrd").parent().move();
          $('.recipe-edit').prop('disabled', false);
          $('.recipe-remove').prop('disabled', false);
          $('.recipe-add-to-grocery-list').prop('disabled', false);
