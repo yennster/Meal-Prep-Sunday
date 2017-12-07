@@ -282,7 +282,7 @@ MealPrepSunday.prototype.editIngredient = function(e) {
   var inventoryRef = this.database.ref("/users/" + currentUser + "/inventory");
   $("#save" + num).on("click", function(e) {
     e.preventDefault();
-    var new_ingred = document.getElementById("new_name" + num).value;
+    var new_ingred = escapeHTML(document.getElementById("new_name" + num).value);
     var new_amt = document.getElementById("new_amount" + num).value;
     var new_unt = document.getElementById("new_units" + num).value;
     inventoryRef.child(key).set({
@@ -358,12 +358,16 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
     var currentUser = this.auth.currentUser.uid;
     this.recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
     var num_ingreds = document.getElementById("recipe-ingredients").childElementCount;
+    var recipe_name = escapeHTML(this.recipeName.value);
+    var recipe_steps = escapeHTML(tthis.recipeInput.value);
+    var img = escapeHTML(tthis.recipeImage.value);
     var ingredUpdates = {};
     for (var i = 0; i < num_ingreds; i++) {
       var newIngredRef = this.recipeRef.push();
       var newKey = newIngredRef.key;
+      var ingrd = escapeHTML(document.getElementById("recipe_ingredient" + i).value);
       var recipeData = {
-        ingredient: document.getElementById("recipe_ingredient" + i).value,
+        ingredient: ingrd,
         amount: document.getElementById("recipe_ingredient_amount" + i).value,
         units: document.getElementById("recipe_ingredient_units" + i).value
       }
@@ -372,12 +376,12 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
     var recipeKey = this.recipeRef.push().key;
     var updates = {};
     var recipeData = {
-      name: this.recipeName.value,
-      recipe: this.recipeInput.value,
+      name: recipe_name,
+      recipe: recipe_steps,
       ingredients: ingredUpdates,
       public: $(this.recipePublic).is(":checked"),
       likes: 0,
-      image: this.recipeImage.value
+      image: img
     }
     if ($(this.recipePublic).is(":checked")) {
       var time = 0 - (Date.now());
@@ -397,7 +401,6 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
       MealPrepSunday.resetMaterialTextfield(this.recipeName);
       MealPrepSunday.resetMaterialTextfield(this.recipeInput);
       this.createRecipeIngredientsNumAdded = 0;
-      //console.log($(this.recipePublic).parent());
       $(this.recipePublic).parent().removeClass('is-checked');
       this.toggleButton();
     }.bind(this));
@@ -406,7 +409,6 @@ MealPrepSunday.prototype.saveRecipe = function(e) {
 
 MealPrepSunday.prototype.saveImport = function(e) {
   e.preventDefault();
-
   if (this.importLink.value && this.checkSignedInWithMessage()) {
     var currentUser = this.auth.currentUser.uid;
     var recipe_link = this.importLink.value;
@@ -414,20 +416,16 @@ MealPrepSunday.prototype.saveImport = function(e) {
     if (!recipe_link.includes("#")) {
       recipe_id = recipe_link.substring(30);
     }
-    //console.log(recipe_id);
     var yummly_id = "004619c4";
     var yummly_key = "86b46ce6f6b2e672f933aba75ff2de10";
     var url = "https://api.yummly.com/v1/api/recipe/" + recipe_id + "?_app_id=" + yummly_id + "&_app_key=" + yummly_key;
-    //console.log(url);
     var database = this.database;
     var blah = this;
     fetch(url).then(function(response) {
       return response.json();
     }).then(function(data) {
-      //console.log(data);
       var img = data.images[0].hostedLargeUrl;
       var ingredients = data.ingredientLines;
-      //console.log(ingredients);
       var recipe_name = data.name;
       var ingredUpdates = {};
       var recipeRef = database.ref("/users/" + currentUser + "/recipes");
@@ -493,92 +491,22 @@ MealPrepSunday.prototype.saveImport = function(e) {
             units = "ounces";
           } else if (units.includes('pt') || units.includes('pint') || units.includes('Pint')|| units.includes('pints')) {
             units = "pints";
+          } else if (units.includes('grams') || units.includes('gram') || units.includes('Gram')|| units.includes('Grams')) {
+            units = "grams";
           } else {
             name = units + " " + name;
             units = "units";
           }
         }
-        if (name.indexOf("chopped") != -1) {
-          name = name.replace("chopped",'');
-        }
-        if (name.indexOf("divided") != -1) {
-          name = name.replace("divided",'');
-        }
-        if (name.indexOf("plus") != -1) {
-          name = name.replace("plus",'');
-        }
-        if (name.indexOf("more") != -1) {
-          name = name.replace("more",'');
-        }
-        if (name.indexOf("thinly") != -1) {
-          name = name.replace("thinly",'');
-        }
-        if (name.indexOf("freshly") != -1) {
-          name = name.replace("freshly",'');
-        }
-        if (name.indexOf("fresh") != -1) {
-          name = name.replace("fresh",'');
-        }
-        if (name.indexOf("softened") != -1) {
-          name = name.replace("softened",'');
-        }
-        if (name.indexOf("warm") != -1) {
-          name = name.replace("warm",'');
-        }
-        if (name.indexOf("peeled") != -1) {
-          name = name.replace("peeled",'');
-        }
-        if (name.indexOf("diced") != -1) {
-          name = name.replace("diced",'');
-        }
-        if (name.indexOf("sliced") != -1) {
-          name = name.replace("sliced",'');
-        }
-        if (name.indexOf("uncooked") != -1) {
-          name = name.replace("uncooked",'');
-        }
-        if (name.indexOf("cooked") != -1) {
-          name = name.replace("cooked",'');
-        }
-        if (name.indexOf("frozen") != -1) {
-          name = name.replace("frozen",'');
-        }
-        if (name.indexOf("shredded") != -1) {
-          name = name.replace("shredded",'');
-        }
-        if (name.indexOf("very") != -1) {
-          name = name.replace("very",'');
-        }
-        if (name.indexOf("ripe") != -1) {
-          name = name.replace("ripe",'');
-        }
-        if (name.indexOf("squeezed") != -1) {
-          name = name.replace("squeezed",'');
-        }
-        if (name.indexOf("mashed") != -1) {
-          name = name.replace("mashed",'');
-        }
-        if (name.indexOf("squeeze of") != -1) {
-          name = name.replace("squeeze of",'');
-        }
-        if (name.indexOf("pinch of") != -1) {
-          name = name.replace("pinch of",'');
-        }
-        if (name.indexOf("A ") != -1) {
-          name = name.replace("A ",'');
-        }/**
-        if (name.indexOf(" or ") != -1) {
-          name = name.replace(" or ",' ');
-        }
-        if (name.indexOf(" and ") != -1) {
-          name = name.replace(" and ",' ');
-        } **/
-        if (name.indexOf(" of ") != -1) {
-          name = name.replace(" of ",' ');
-        }
-        if (name.indexOf("for") != -1) {
-          var forRecipe = name.substring(name.indexOf("for"));
-          name = name.replace(forRecipe,'');
+        var words = ["chopped", "divided", "plus", "more", "thinly", "thin", "freshly", "fresh",
+                     "softened", "warm", "peeled", "diced", "sliced", "uncooked", "cooked",
+                     "frozen", "shredded", " very ", "ripe", "squeezed", "mashed", "squeeze of",
+                     "pinch of", "A ", " of ", " for ", "Club House"]; //" or ", " and "
+        for (var j = 0; j < words.length; j++) {
+          console.log(words[j]);
+          if (name.indexOf(words[j]) != -1) {
+            name = name.replace(words[j],'');
+          }
         }
         if (name.indexOf("(") != -1) {
           if (name.indexOf(")") != -1) {
@@ -603,9 +531,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
         if (name.indexOf(", ") != -1) {
           name = name.replace(", ",' ');
         }
-        if (name.indexOf("Club House") != -1) {
-          name = name.replace("Club House",'');
-        }
         //console.log("name: " + name + ", amount: " + amount + ", units: " + units);
         var ingred = {
           ingredient : name,
@@ -616,7 +541,7 @@ MealPrepSunday.prototype.saveImport = function(e) {
       }
       var recipeData = {
         name: recipe_name,
-        recipe: "<a target='_blank' href='" + data.source.sourceRecipeUrl + "'>" + data.source.sourceRecipeUrl + "</a>",
+        recipe: data.source.sourceRecipeUrl,
         ingredients: ingredUpdates,
         public: false,
         likes: 0,
@@ -625,7 +550,6 @@ MealPrepSunday.prototype.saveImport = function(e) {
       var updates = {};
       var recipeKey = recipeRef.push().key;
       updates["/users/" + currentUser + "/recipes/" + recipeKey] = recipeData;
-      //console.log(recipeData);
       database.ref().update(updates).then(function() {
         MealPrepSunday.resetMaterialTextfield(document.getElementById('recipe_link'));
         blah.toggleButton();
@@ -728,7 +652,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   var img = $(target.parentNode.parentNode.firstChild).css("background").replace(/.*\s?url\([\'\"]?/, '').replace(/[\'\"]?\).*/, '');
   var num = target.id.substring(11);
   var steps = document.getElementById("recipe_data" + num);
-  var steps_data = steps.firstChild.innerHTML;
+  var steps_data = escapeHTML(steps.firstChild.textContent);
   var currentUser = this.auth.currentUser.uid;
   target.style.display = "none";
   $('.recipe-edit').prop('disabled', true);
@@ -740,7 +664,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   $(target.parentNode.parentNode).removeClass("mdl-cell--4-col");
   $(target.parentNode.parentNode).addClass("mdl-cell--12-col");
   var recipe = document.getElementById("recipe_name" + num);
-  var recipe_name = recipe.textContent;
+  var recipe_name = escapeHTML(recipe.textContent);
   recipe.innerHTML = "<input class='mdl-textfield__input' type='text' value='"
                           + recipe_name + "' id='new_name" + num + "'>";
   steps.innerHTML = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width:100%;">' +
@@ -769,6 +693,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
   recipeRef.once('value').then(function(snapshot) {
      var data = snapshot.val();
      var is_pub = data.public;
+     console.log(is_pub);
      if (is_pub) {
        public_div.firstChild.MaterialCheckbox.check();
      }
@@ -831,6 +756,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
       var row = tbody.getElementsByTagName('tr')[i];
       var item_id = row.firstChild.firstChild.firstChild.id;
       var new_item = document.getElementById(item_id).value;
+      new_item = escapeHTML(new_item);
       var amt_id = row.firstChild.nextSibling.firstChild.firstChild.id;
       var new_item_amt = document.getElementById(amt_id).value;
       var units_id = row.firstChild.nextSibling.nextSibling.firstChild.firstChild.id;
@@ -844,14 +770,14 @@ MealPrepSunday.prototype.editRecipe = function(e) {
       row.firstChild.nextSibling.innerHTML = new_item_amt;
       row.firstChild.nextSibling.nextSibling.innerHTML = new_item_unt;
     }
-    var new_name = document.getElementById("new_name" + num).value;
-    var new_recipe = document.getElementById('new_recipe_data' + num).value;
+    var new_name = escapeHTML(document.getElementById("new_name" + num).value);
+    var new_recipe = escapeHTML(document.getElementById('new_recipe_data' + num).value);
+    var new_img = escapeHTML(document.getElementById('new_recipe' + num + "_image").value);
     var curlikes;
     var updates = {};
     recipeRef.child(key).once('value').then(function(snapshot) {
        var data = snapshot.val();
        curlikes = data.likes;
-       var new_img = document.getElementById('new_recipe' + num + "_image").value;
        var old_public = data.public;
        var is_public = $(public_div.firstChild.firstChild).is(":checked");
        if (is_public && (old_public == false)) {
@@ -870,10 +796,10 @@ MealPrepSunday.prototype.editRecipe = function(e) {
        db.update(updates);
        recipeRef.child(key).set({
          name: new_name,
-         ingredients: ingredUpdates,
-         recipe: new_recipe,
-         public: is_public,
          likes: curlikes,
+         public: is_public,
+         recipe: new_recipe,
+         ingredients: ingredUpdates,
          image: new_img
        }).then(function() {
          $(target.parentNode.parentNode).removeClass("mdl-cell--12-col");
@@ -941,7 +867,7 @@ MealPrepSunday.prototype.recipeAddToGrocery = function(e) {
   e.preventDefault();
   var target = e.target.parentNode;
   if ((!$(target).hasClass("recipe-add-to-grocery-list"))) return;
-  var recipe_name = target.parentNode.parentNode.firstChild.firstChild.textContent;
+  var recipe_name = escapeHTML(target.parentNode.parentNode.firstChild.firstChild.textContent);
   var num = target.id.substring(14);
   var ingreds_table = document.getElementById("recipe_ingrds" + num);
   var ingreds = ingreds_table.firstChild.nextSibling;
@@ -952,7 +878,7 @@ MealPrepSunday.prototype.recipeAddToGrocery = function(e) {
   for (var i = 0; i < num_rows; i++) {
     var new_key = itemRef.push().key;
     var row = document.getElementById('recipe' + num + "_ingrd" + i);
-    var itm = row.firstChild.textContent;
+    var itm = escapeHTML(row.firstChild.textContent);
     var item_amt = row.firstChild.nextSibling.textContent;
     var item_unt = row.firstChild.nextSibling.nextSibling.textContent;
     itemUpdates[new_key] = {
@@ -974,8 +900,7 @@ MealPrepSunday.prototype.recipeAddToPlanner = function(e) {
   var target = e.target.parentNode;
   if ((!$(target).hasClass("recipe-add-to-planner"))) return;
   var key = target.parentNode.parentNode.id;
-  var recipe_name = target.parentNode.parentNode.firstChild.firstChild.textContent;
-  //console.log(recipe_name);
+  var recipe_name = escapeHTML(target.parentNode.parentNode.firstChild.firstChild.textContent);
   var num = target.id.substring(10);
   var ingreds_table = document.getElementById("recipe_ingrds" + num);
   var ingreds = ingreds_table.firstChild.nextSibling;
@@ -1491,7 +1416,7 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
      var item_amt = row.firstChild.nextSibling.textContent;
      var item_unt = row.firstChild.nextSibling.nextSibling.textContent;
      itemUpdates[new_key] = {
-       ingredient: itm,
+       ingredient: escapeHTML(itm),
        amount: item_amt,
        units: item_unt,
        recipe: key
@@ -1499,12 +1424,12 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    }
    var currentUser = this.auth.currentUser.uid;
    recipeRef.child(new_recipe_key).set({
-     name: recipe_name,
+     name: escapeHTML(recipe_name),
      likes: 0,
      public: false,
-     recipe: recipe_steps,
+     recipe: escapeHTML(recipe_steps),
      ingredients: itemUpdates,
-     image: img
+     image: escapeHTML(img)
    });
    var data = {
      message: '"' + recipe_name + '" has been added to your recipes',
@@ -1547,6 +1472,15 @@ MealPrepSunday.prototype.toggleButton = function() {
     this.importRecipe.setAttribute('disabled', 'true');
   }
 };
+
+function escapeHTML(unsafe_str) {
+    return unsafe_str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/\'/g, '&#39;'); // '&apos;' is not valid HTML 4
+}
 
 // Resets the given MaterialTextField.
 MealPrepSunday.resetMaterialTextfield = function(element) {
