@@ -782,16 +782,12 @@ MealPrepSunday.prototype.editRecipe = function(e) {
     componentHandler.upgradeDom();
     getmdlSelect.init(".getmdl-select");
     $(".added_ingred_remove").on('click', function(e) {
-      console.log(e.target);
       if ((!$(e.target.parentNode).hasClass("added_ingred_remove"))) return;
-      console.log(e.target.parentNode.parentNode.parentNode);
       e.target.parentNode.parentNode.parentNode.outerHTML = "";
     });
   });
   $(".new_recipe_remove").on('click', function(e) {
-    console.log(e.target);
     if ((!$(e.target.parentNode).hasClass("new_recipe_remove"))) return;
-    console.log(e.target.parentNode.parentNode.parentNode);
     e.target.parentNode.parentNode.parentNode.outerHTML = "";
   });
   var recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
@@ -801,7 +797,6 @@ MealPrepSunday.prototype.editRecipe = function(e) {
     e.preventDefault();
     var ingredUpdates = {};
     num_rows = $('#recipe_ingrds' + num).find('tbody').children().length;
-    console.log(num_rows);
     tbody = document.getElementById('recipe_ingrds' + num).firstChild.nextSibling;
     for (var i = 0; i < num_rows; i++) {
       var new_key = recipeRef.push().key;
@@ -871,7 +866,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
          target.nextSibling.style.display = "none";
          $(".new_recipe_remove").parent().remove();
          $(".added_ingred_remove").parent().remove();
-         $("#edit_recipe_add_ingrd").parent().move();
+         $(".edit_recipe_add").parent().remove();
          $('.recipe-edit').prop('disabled', false);
          $('.recipe-remove').prop('disabled', false);
          $('.recipe-add-to-grocery-list').prop('disabled', false);
