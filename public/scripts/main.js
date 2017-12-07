@@ -629,6 +629,7 @@ MealPrepSunday.prototype.displayRecipes = function(key, name, recipe, ingredient
   var btns = container.firstChild.nextSibling.nextSibling.nextSibling.firstChild;
   btns.setAttribute('id', "recipe_edit" + num);
   btns.nextSibling.setAttribute('id', "recipe_save" + num);
+  //btns.nextSibling.outerHTML += '<div class="mdl-tooltip" data-mdl-for="recipe_save' + num + '">Save recipe</div>';
   btns.nextSibling.nextSibling.setAttribute('id', "recipe_remove" + num);
   btns.nextSibling.nextSibling.nextSibling.setAttribute('id', "recipe_day" + num);
   btns.nextSibling.nextSibling.nextSibling.nextSibling.setAttribute('id', "recipe_grocery" + num);
@@ -710,7 +711,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
       "<input class='mdl-textfield__input' type='text' value='" + name + "' id='new_recipe" + num + "_name" + i + "'>" +
       '<label class="mdl-textfield__label" for="new_recipe' + num + '_name"' + i + '>Name</label></div>';
     amount.innerHTML = "<div class='mdl-textfield mdl-js-textfield mdl-textfield--floating-label' style='width:100%;'>" +
-      "<input class='mdl-textfield__input' type='text' value='" + current_amt + "' id='new_recipe" + num + "_amount" + i + "'>" +
+      "<input class='mdl-textfield__input' step='any' type='number' value='" + current_amt + "' id='new_recipe" + num + "_amount" + i + "'>" +
       '<label class="mdl-textfield__label" for="new_recipe' + num + '_amount"' + i + '>Amount</label></div>';
     units.innerHTML = '<div class="edit-recipe-units mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth">' +
               '<input class="mdl-textfield__input" type="text" id="new_recipe' + num + "_units" + i + '" value="' + current_units + '" readonly>' +
@@ -732,14 +733,65 @@ MealPrepSunday.prototype.editRecipe = function(e) {
                   '<li class="mdl-menu__item" data-val="grams">grams</li>' +
               '</ul></div>';
     var rmv = '<td class="zindex mdl-data-table__cell">' +
-    '<button class="new_recipe_remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent"><i class="material-icons">remove</i></button></td>';
+    '<button id="remove_ingred_' + i + '" class="new_recipe_remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent">' +
+    '<i class="material-icons">remove</i></button><div class="mdl-tooltip" data-mdl-for="remove_ingred_' + i + '">Remove ingredient</div></td>';
     units.outerHTML += rmv;
   }
+  document.getElementById('recipe_ingrds' + num).outerHTML +=
+    '<div style="padding: 6px; margin:auto; text-align:center;"><button id="edit_recipe_add_ingrd" class="edit_recipe_add mdl-button mdl-js-button mdl-button--icon mdl-button--accent">' +
+    '<i class="material-icons">add</i></button><div class="mdl-tooltip" data-mdl-for="edit_recipe_add_ingrd">Add ingredient</div></div>';
   componentHandler.upgradeDom();
-  getmdlSelect.init(".getmdl-select");
+  getmdlSelect.init(".getmdl-select");;
   var currentUser = this.auth.currentUser.uid;
+  $(".edit_recipe_add").on('click', function(e) {
+    if ((!$(e.target.parentNode).hasClass("edit_recipe_add"))) return;
+    var this_num = $('#recipe_ingrds' + num).find('tbody').children().length;
+    var tr = document.createElement("tr");
+    tr.setAttribute('id', "recipe" + num + "_ingrd" + this_num);
+    tr.innerHTML = MealPrepSunday.EDIT_RECIPE_ADD;
+    tr.firstChild.innerHTML = "<div class='mdl-textfield mdl-js-textfield mdl-textfield--floating-label' style='width:100%;'>" +
+      "<input class='mdl-textfield__input' type='text' value='" + "' id='new_recipe" + num + "_name" + this_num + "'>" +
+      '<label class="mdl-textfield__label" for="new_recipe' + num + '_name"' + this_num + '>Name</label></div>';
+    tr.firstChild.nextSibling.innerHTML = "<div class='mdl-textfield mdl-js-textfield mdl-textfield--floating-label' style='width:100%;'>" +
+      "<input class='mdl-textfield__input' step='any' type='number' value='" + "' id='new_recipe" + num + "_amount" + this_num + "'>" +
+      '<label class="mdl-textfield__label" for="new_recipe' + num + '_amount"' + this_num + '>Amount</label></div>';
+    tr.firstChild.nextSibling.nextSibling.innerHTML = '<div class="edit-recipe-units mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height getmdl-select__fullwidth">' +
+              '<input class="mdl-textfield__input" type="text" id="new_recipe' + num + "_units" + this_num + '" value="' + '" readonly>' +
+              '<label for="new_recipe' + num + "_units" + this_num + '">' +
+                  '<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>' +
+              '</label>' +
+              '<label for="new_recipe' + num + "_units" + this_num + '" class="mdl-textfield__label">Units</label>' +
+              '<ul for="new_recipe' + num + "_units" + this_num + '" class="mdl-menu mdl-menu--bottom-left mdl-js-menu flexdropdown">' +
+                  '<li class="mdl-menu__item" data-val="units">units</li>' +
+                  '<li class="mdl-menu__item" data-val="cups">cups</li>' +
+                  '<li class="mdl-menu__item" data-val="tsp">tsp</li>' +
+                  '<li class="mdl-menu__item" data-val="tbsp">tbsp</li>' +
+                  '<li class="mdl-menu__item" data-val="ounces">ounces</li>' +
+                  '<li class="mdl-menu__item" data-val="pints">pints</li>' +
+                  '<li class="mdl-menu__item" data-val="gallons">gallons</li>' +
+                  '<li class="mdl-menu__item" data-val="quarts">quarts</li>' +
+                  '<li class="mdl-menu__item" data-val="liters">liters</li>' +
+                  '<li class="mdl-menu__item" data-val="lbs">lbs</li>' +
+                  '<li class="mdl-menu__item" data-val="grams">grams</li>' +
+              '</ul></div>';
+    var rmv = '<td class="zindex mdl-data-table__cell">' +
+    '<button id="remove_ingred_' + this_num + '" class="added_ingred_remove mdl-button mdl-js-button mdl-button--icon mdl-button--accent">' +
+    '<i class="material-icons">remove</i></button><div class="mdl-tooltip" data-mdl-for="remove_ingred_' + this_num + '">Remove ingredient</div></td>';
+    tr.firstChild.nextSibling.nextSibling.outerHTML += rmv;
+    $('#recipe_ingrds' + num).find('tbody').append(tr);
+    componentHandler.upgradeDom();
+    getmdlSelect.init(".getmdl-select");
+    $(".added_ingred_remove").on('click', function(e) {
+      console.log(e.target);
+      if ((!$(e.target.parentNode).hasClass("added_ingred_remove"))) return;
+      console.log(e.target.parentNode.parentNode.parentNode);
+      e.target.parentNode.parentNode.parentNode.outerHTML = "";
+    });
+  });
   $(".new_recipe_remove").on('click', function(e) {
+    console.log(e.target);
     if ((!$(e.target.parentNode).hasClass("new_recipe_remove"))) return;
+    console.log(e.target.parentNode.parentNode.parentNode);
     e.target.parentNode.parentNode.parentNode.outerHTML = "";
   });
   var recipeRef = this.database.ref("/users/" + currentUser + "/recipes");
@@ -748,7 +800,9 @@ MealPrepSunday.prototype.editRecipe = function(e) {
     if ((!$(e.target.parentNode).hasClass("recipe-submit"))) return;
     e.preventDefault();
     var ingredUpdates = {};
-    num_rows = tbody.childElementCount;
+    num_rows = $('#recipe_ingrds' + num).find('tbody').children().length;
+    console.log(num_rows);
+    tbody = document.getElementById('recipe_ingrds' + num).firstChild.nextSibling;
     for (var i = 0; i < num_rows; i++) {
       var new_key = recipeRef.push().key;
       var row = tbody.getElementsByTagName('tr')[i];
@@ -816,6 +870,7 @@ MealPrepSunday.prototype.editRecipe = function(e) {
          target.style.display = "inline";
          target.nextSibling.style.display = "none";
          $(".new_recipe_remove").parent().remove();
+         $(".edit_recipe_add").parent().move();
          $('.recipe-edit').prop('disabled', false);
          $('.recipe-remove').prop('disabled', false);
          $('.recipe-add-to-grocery-list').prop('disabled', false);
@@ -830,6 +885,11 @@ MealPrepSunday.prototype.editRecipe = function(e) {
 MealPrepSunday.EDIT_RECIPE_IMAGE =
     '<input class="mdl-textfield__input" type="text">' +
     '<label class="mdl-textfield__label">Image URL</label>';
+
+MealPrepSunday.EDIT_RECIPE_ADD =
+    '<td class="mdl-data-table__cell--non-numeric"></td>' +
+    '<td class="mdl-data-table__cell--numeric"></td>' +
+    '<td class="mdl-data-table__cell--non-numeric"></td>';
 
 MealPrepSunday.EDIT_RECIPE_PUBLIC =
 '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">' +
@@ -1318,7 +1378,11 @@ MealPrepSunday.GROCERY_LIST_TEMPLATE =
    } else {
      current_likes.innerHTML = likes + " likes";
    }
+   var publicAdd = likes_div.firstChild.nextSibling;
+   publicAdd.setAttribute('id', "public_add" + num)
+   //publicAdd.outerHTML += '<div class="mdl-tooltip" data-mdl-for="public_add' + num + '">Save to recipes</div>';
    this.publicRecipeList.appendChild(container);
+   componentHandler.upgradeDom();
  };
 
  MealPrepSunday.prototype.likePublicRecipe = function(e) {
